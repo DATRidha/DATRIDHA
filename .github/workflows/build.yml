@@ -16,18 +16,34 @@ jobs:
           rm -rf project
           unzip -q DATRIDHA_project_COLORED_FUNCTIONAL_FINAL.zip -d project
 
-      - name: Restore MainActivity
+      - name: Find and restore MainActivity
         run: |
-          mkdir -p project/app/src/main/java/com/datridha/app
-          cp project/app/src/main/java/com/datridha/app/MainActivity.java /tmp/old_MainActivity.java
-          git show HEAD:project/app/src/main/java/com/datridha/app/MainActivity.java > project/app/src/main/java/com/datridha/app/MainActivity.java
+          echo "Searching for MainActivity.java..."
+          TARGET=$(find project -type f -name "MainActivity.java" | head -1)
+
+          if [ -z "$TARGET" ]; then
+            echo "ERROR: MainActivity.java was not found inside the ZIP project."
+            echo "Files found:"
+            find project -maxdepth 8 -type f | head -100
+            exit 1
+          fi
+
+          echo "MainActivity found at:"
+          echo "$TARGET"
+
+          git show HEAD:project/app/src/main/java/com/datridha/app/MainActivity.java > "$TARGET"
+
+          echo "MainActivity restored successfully."
 
       - name: Verify MainActivity
         run: |
-          echo "===== MAIN ACTIVITY ====="
-          grep -n "class MainActivity" project/app/src/main/java/com/datridha/app/MainActivity.java
-          grep -n "DATRIDHA" project/app/src/main/java/com/datridha/app/MainActivity.java | head -10
-          echo "===== END ====="
+          TARGET=$(find project -type f -name "MainActivity.java" | head -1)
+          echo "===== MainActivity location ====="
+          echo "$TARGET"
+          echo "===== Class declaration ====="
+          grep -n "class MainActivity" "$TARGET"
+          echo "===== DATRIDHA references ====="
+          grep -n "DATRIDHA" "$TARGET" | head -10
 
       - name: Set up Java 17
         uses: actions/setup-java@v5
@@ -40,17 +56,25 @@ jobs:
         with:
           gradle-version: '8.2'
 
+      - name: Find Gradle project
+        run: |
+          echo "Searching for Gradle project..."
+          find project \( -name settings.gradle -o -name settings.gradle.kts \) -print
+
       - name: Build APK
         run: |
-          gradle -p project assembleDebug
+          PROJECT_DIR=$(dirname "$(find project \( -name settings.gradle -o -name settings.gradle.kts \) -print -quit)")
+          echo "Gradle project: $PROJECT_DIR"
+          gradle -p "$PROJECT_DIR" assembleDebug
 
-      - name: Show APK information
+      - name: Find APK
         run: |
-          ls -lh project/app/build/outputs/apk/debug/app-debug.apk
+          echo "Searching for APK..."
+          find project -type f -name "app-debug.apk" -print
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: DATRIDHA-FINAL
-          path: project/app/build/outputs/apk/debug/app-debug.apk
+          path: project/**/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
