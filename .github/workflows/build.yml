@@ -26,13 +26,20 @@ jobs:
         with:
           gradle-version: '8.2'
 
+      - name: Find Gradle project
+        run: |
+          echo "Searching for Gradle project..."
+          find project \( -name settings.gradle -o -name settings.gradle.kts \) -print
+
       - name: Build APK
         run: |
-          gradle -p project assembleDebug
+          PROJECT_DIR=$(dirname "$(find project \( -name settings.gradle -o -name settings.gradle.kts \) -print -quit)")
+          echo "Gradle project found at: $PROJECT_DIR"
+          gradle -p "$PROJECT_DIR" assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: DATRIDHA-APK
-          path: project/app/build/outputs/apk/debug/app-debug.apk
+          path: project/**/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
