@@ -11,9 +11,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Prepare Android project
+      - name: Prepare DATRIDHA project
         run: |
-          unzip -q DATRIDHA_project_READY_v2.zip -d project
+          rm -rf project
+          unzip -q DATRIDHA_project_COLORED_FUNCTIONAL_FINAL.zip -d project
 
       - name: Set up Java 17
         uses: actions/setup-java@v5
