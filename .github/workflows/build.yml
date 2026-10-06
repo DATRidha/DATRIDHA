@@ -1,4 +1,4 @@
-name: Build DATRIDHA
+: Build DATRIDHA
 
 on:
   workflow_dispatch:
