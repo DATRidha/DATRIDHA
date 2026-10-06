@@ -16,56 +16,45 @@ jobs:
           rm -rf project
           unzip -q DATRIDHA_project_COLORED_FUNCTIONAL_FINAL.zip -d project
 
-      - name: Inspect Android Manifest
+      - name: Restore MainActivity
         run: |
-          echo "========================================"
-          echo "ANDROID MANIFEST FILES"
-          echo "========================================"
-
-          find project -type f -name "AndroidManifest.xml" -print
-
-          echo ""
-          echo "========================================"
-          echo "LAUNCHER ACTIVITY"
-          echo "========================================"
-
-          find project -type f -name "AndroidManifest.xml" -print0 |
-          while IFS= read -r -d '' MANIFEST
-          do
-            echo ""
-            echo "----- $MANIFEST -----"
-            grep -n -E 'package=|<activity|MAIN|LAUNCHER' "$MANIFEST" || true
-          done
-
-      - name: Find and restore MainActivity
-        run: |
-          echo "Searching for MainActivity.java..."
           TARGET=$(find project -type f -name "MainActivity.java" | head -1)
 
           if [ -z "$TARGET" ]; then
-            echo "ERROR: MainActivity.java was not found."
+            echo "ERROR: MainActivity.java not found"
             exit 1
           fi
 
-          echo "MainActivity found at:"
-          echo "$TARGET"
+          echo "TARGET=$TARGET"
 
           git show HEAD:project/app/src/main/java/com/datridha/app/MainActivity.java > "$TARGET"
 
-          echo "MainActivity restored successfully."
-
-      - name: Verify MainActivity
+      - name: Inspect MainActivity
         run: |
           TARGET=$(find project -type f -name "MainActivity.java" | head -1)
 
-          echo "===== MainActivity location ====="
+          echo "========================================"
+          echo "MAIN ACTIVITY USED FOR BUILD"
+          echo "========================================"
+
+          echo "FILE:"
           echo "$TARGET"
 
-          echo "===== Class declaration ====="
-          grep -n "class MainActivity" "$TARGET"
+          echo ""
+          echo "SIZE:"
+          wc -c "$TARGET"
 
-          echo "===== DATRIDHA references ====="
-          grep -n "DATRIDHA" "$TARGET" | head -10
+          echo ""
+          echo "FIRST 40 LINES:"
+          head -40 "$TARGET"
+
+          echo ""
+          echo "DATRIDHA REFERENCES:"
+          grep -n "DATRIDHA" "$TARGET" | head -20 || true
+
+          echo ""
+          echo "ACTIVITY DECLARATION:"
+          grep -n "class MainActivity" "$TARGET" || true
 
       - name: Set up Java 17
         uses: actions/setup-java@v5
@@ -80,18 +69,16 @@ jobs:
 
       - name: Find Gradle project
         run: |
-          echo "Searching for Gradle project..."
-          find project \( -name settings.gradle -o -name settings.gradle.kts \) -print
+          PROJECT_DIR=$(dirname "$(find project \( -name settings.gradle -o -name settings.gradle.kts \) -print -quit)")
+          echo "Gradle project: $PROJECT_DIR"
 
       - name: Build APK
         run: |
           PROJECT_DIR=$(dirname "$(find project \( -name settings.gradle -o -name settings.gradle.kts \) -print -quit)")
-          echo "Gradle project: $PROJECT_DIR"
           gradle -p "$PROJECT_DIR" assembleDebug
 
       - name: Find APK
         run: |
-          echo "Searching for APK..."
           find project -type f -name "app-debug.apk" -print
 
       - name: Upload APK
