@@ -5,512 +5,705 @@ import android.os.Bundle;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
-import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
+
 import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends Activity {
+
+    // =========================
+    // COLORS
+    // =========================
+
+    private static final int GREEN = Color.rgb(23, 107, 58);
+    private static final int LIGHT_GREEN = Color.rgb(46, 139, 87);
+    private static final int GOLD = Color.rgb(212, 175, 55);
+    private static final int BROWN = Color.rgb(91, 58, 30);
+    private static final int BEIGE = Color.rgb(247, 233, 215);
+    private static final int WHITE = Color.WHITE;
+    private static final int DARK = Color.rgb(45, 45, 45);
+    private static final int BLUE = Color.rgb(45, 110, 190);
+    private static final int YELLOW = Color.rgb(220, 170, 40);
+
+    // =========================
+    // APP STATE
+    // =========================
 
     private LinearLayout root;
     private boolean french = false;
 
-    private final int GREEN = Color.rgb(23,107,58);
-    private final int LIGHT_GREEN = Color.rgb(46,139,87);
-    private final int GOLD = Color.rgb(212,175,55);
-    private final int BROWN = Color.rgb(91,58,30);
-    private final int BEIGE = Color.rgb(247,233,215);
-    private final int WHITE = Color.WHITE;
-    private final int DARK = Color.rgb(45,45,45);
+    private final List<String> orders = new ArrayList<>();
 
-    private ArrayList<String> orders = new ArrayList<>();
+    // =========================
+    // ACTIVITY
+    // =========================
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        orders.add("Commande #001 - 2 tonnes - En cours");
+        orders.add("Commande #002 - 5 tonnes - Acceptée");
+
         showSplash();
     }
 
-    private TextView tv(String text, float size, int color, boolean bold) {
+    // =========================
+    // BASIC UI
+    // =========================
+
+    private void createRoot() {
+        root = new LinearLayout(this);
+        root.setOrientation(LinearLayout.VERTICAL);
+        root.setBackgroundColor(BEIGE);
+
+        ScrollView scrollView = new ScrollView(this);
+        scrollView.setFillViewport(true);
+
+        scrollView.addView(root);
+
+        setContentView(scrollView);
+    }
+
+    private TextView text(
+            String value,
+            float size,
+            int color,
+            boolean bold
+    ) {
         TextView t = new TextView(this);
-        t.setText(text);
+
+        t.setText(value);
         t.setTextSize(size);
         t.setTextColor(color);
-        t.setGravity(Gravity.CENTER);
-        t.setPadding(16,12,16,12);
-        if (bold) t.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+        t.setGravity(Gravity.CENTER_VERTICAL);
+
+        if (bold) {
+            t.setTypeface(
+                    Typeface.create(
+                            Typeface.DEFAULT,
+                            Typeface.BOLD
+                    )
+            );
+        }
+
+        t.setPadding(20, 15, 20, 15);
+
         return t;
     }
 
-    private GradientDrawable bg(int color, float radius) {
-        GradientDrawable g = new GradientDrawable();
-        g.setColor(color);
-        g.setCornerRadius(radius);
-        return g;
-    }
-
-    private Button button(String text, int color) {
+    private Button button(
+            String title,
+            int color
+    ) {
         Button b = new Button(this);
-        b.setText(text);
-        b.setTextSize(16);
+
+        b.setText(title);
         b.setTextColor(WHITE);
+        b.setTextSize(15);
         b.setAllCaps(false);
-        b.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
-        b.setBackground(bg(color, 30));
-        b.setPadding(15,8,15,8);
+        b.setBackgroundColor(color);
 
         LinearLayout.LayoutParams p =
                 new LinearLayout.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT);
-        p.setMargins(0,8,0,8);
+                        ViewGroup.LayoutParams.WRAP_CONTENT
+                );
+
+        p.setMargins(20, 8, 20, 8);
+
         b.setLayoutParams(p);
+
         return b;
     }
 
-    private TextView cardText(String text) {
-        TextView t = tv(text, 16, DARK, false);
-        t.setGravity(Gravity.CENTER);
-        t.setBackground(bg(WHITE, 22));
+    private LinearLayout card() {
+
+        LinearLayout c = new LinearLayout(this);
+
+        c.setOrientation(LinearLayout.VERTICAL);
+        c.setPadding(15, 15, 15, 15);
+        c.setBackgroundColor(WHITE);
 
         LinearLayout.LayoutParams p =
                 new LinearLayout.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT);
-        p.setMargins(0,7,0,7);
-        t.setLayoutParams(p);
+                        ViewGroup.LayoutParams.WRAP_CONTENT
+                );
+
+        p.setMargins(15, 10, 15, 10);
+
+        c.setLayoutParams(p);
+
+        return c;
+    }
+
+    private TextView cardText(String value) {
+
+        TextView t = text(
+                value,
+                15,
+                DARK,
+                false
+        );
+
+        t.setBackgroundColor(WHITE);
+
         return t;
     }
 
-    private EditText input(String hint) {
+    private EditText input(
+            String hint
+    ) {
+
         EditText e = new EditText(this);
+
         e.setHint(hint);
-        e.setTextSize(16);
-        e.setTextColor(DARK);
-        e.setHintTextColor(Color.GRAY);
-        e.setSingleLine(false);
-        e.setPadding(18,14,18,14);
-        e.setBackground(bg(WHITE,20));
+        e.setTextSize(15);
+        e.setPadding(20, 15, 20, 15);
+        e.setBackgroundColor(WHITE);
 
         LinearLayout.LayoutParams p =
                 new LinearLayout.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT);
-        p.setMargins(0,6,0,6);
+                        ViewGroup.LayoutParams.WRAP_CONTENT
+                );
+
+        p.setMargins(15, 7, 15, 7);
+
         e.setLayoutParams(p);
+
         return e;
     }
 
-    private void base(String title, String subtitle) {
-        ScrollView scroll = new ScrollView(this);
+    // =========================
+    // HEADER
+    // =========================
 
-        root = new LinearLayout(this);
-        root.setOrientation(LinearLayout.VERTICAL);
-        root.setPadding(18,16,18,90);
-        root.setBackgroundColor(BEIGE);
+    private void header() {
 
-        scroll.addView(root);
-        setContentView(scroll);
+        LinearLayout h = new LinearLayout(this);
 
-        LinearLayout header = new LinearLayout(this);
-        header.setGravity(Gravity.CENTER_VERTICAL);
-        header.setPadding(8,8,8,8);
-        header.setBackground(bg(GREEN,22));
+        h.setOrientation(LinearLayout.HORIZONTAL);
+        h.setGravity(Gravity.CENTER_VERTICAL);
+        h.setPadding(15, 12, 15, 12);
+        h.setBackgroundColor(GREEN);
 
-        TextView logo = tv("🌴 DATRIDHA",20,WHITE,true);
-        logo.setGravity(Gravity.CENTER);
+        TextView logo = text(
+                "🌴 DATRIDHA",
+                23,
+                WHITE,
+                true
+        );
 
-        header.addView(logo,new LinearLayout.LayoutParams(
-                0,ViewGroup.LayoutParams.WRAP_CONTENT,1));
+        h.addView(
+                logo,
+                new LinearLayout.LayoutParams(
+                        0,
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        1
+                )
+        );
 
         Button lang = new Button(this);
-        lang.setText(french ? "عربي" : "FR");
+
+        lang.setText(
+                french ? "عربي" : "FR"
+        );
+
         lang.setTextColor(WHITE);
         lang.setAllCaps(false);
-        lang.setBackground(bg(LIGHT_GREEN,20));
+        lang.setBackgroundColor(LIGHT_GREEN);
+
         lang.setOnClickListener(v -> {
+
             french = !french;
+
             showHome();
         });
 
-        header.addView(lang,new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT));
+        h.addView(lang);
 
-        root.addView(header);
-
-        TextView h = tv(title,28,GREEN,true);
-        h.setPadding(8,22,8,5);
         root.addView(h);
-
-        TextView sub = tv(subtitle,15,BROWN,false);
-        root.addView(sub);
     }
 
-    private void addBottomNav() {
-        Space space = new Space(this);
-        root.addView(space,new LinearLayout.LayoutParams(
-                1,18));
+    // =========================
+    // BASE PAGE
+    // =========================
 
-        LinearLayout nav = new LinearLayout(this);
-        nav.setOrientation(LinearLayout.HORIZONTAL);
-        nav.setGravity(Gravity.CENTER);
-        nav.setPadding(4,4,4,4);
-        nav.setBackground(bg(GREEN,25));
+    private void base(
+            String title,
+            String subtitle
+    ) {
 
-        Button home = navButton(french ? "Accueil" : "الرئيسية");
-        Button buy = navButton(french ? "Acheter" : "شراء");
-        Button order = navButton(french ? "Commandes" : "الطلبات");
-        Button contact = navButton(french ? "Contact" : "تواصل");
+        createRoot();
 
-        home.setOnClickListener(v -> showHome());
-        buy.setOnClickListener(v -> showBuy());
-        order.setOnClickListener(v -> showOrders());
-        contact.setOnClickListener(v -> showContact());
+        header();
 
-        nav.addView(home,new LinearLayout.LayoutParams(0,
-                ViewGroup.LayoutParams.WRAP_CONTENT,1));
-        nav.addView(buy,new LinearLayout.LayoutParams(0,
-                ViewGroup.LayoutParams.WRAP_CONTENT,1));
-        nav.addView(order,new LinearLayout.LayoutParams(0,
-                ViewGroup.LayoutParams.WRAP_CONTENT,1));
-        nav.addView(contact,new LinearLayout.LayoutParams(0,
-                ViewGroup.LayoutParams.WRAP_CONTENT,1));
+        TextView t = text(
+                title,
+                26,
+                GREEN,
+                true
+        );
 
-        root.addView(nav);
+        t.setGravity(Gravity.CENTER);
+
+        root.addView(t);
+
+        TextView s = text(
+                subtitle,
+                15,
+                BROWN,
+                false
+        );
+
+        s.setGravity(Gravity.CENTER);
+
+        root.addView(s);
     }
 
-    private Button navButton(String text) {
-        Button b = new Button(this);
-        b.setText(text);
-        b.setTextSize(12);
-        b.setTextColor(WHITE);
-        b.setAllCaps(false);
-        b.setBackgroundColor(Color.TRANSPARENT);
-        return b;
-    }
+    // =========================
+    // SPLASH
+    // =========================
 
     private void showSplash() {
-        LinearLayout l = new LinearLayout(this);
-        l.setOrientation(LinearLayout.VERTICAL);
-        l.setGravity(Gravity.CENTER);
-        l.setPadding(30,30,30,30);
-        l.setBackgroundColor(GREEN);
 
-        TextView palm = tv("🌴",70,WHITE,true);
-        l.addView(palm);
+        createRoot();
 
-        TextView logo = tv("DATRIDHA",42,GOLD,true);
-        l.addView(logo);
+        root.setGravity(Gravity.CENTER);
+        root.setBackgroundColor(GREEN);
 
-        TextView name = tv(
-                french ? "Deglet Nour de Bechni" :
+        TextView palm = text(
+                "🌴",
+                60,
+                WHITE,
+                false
+        );
+
+        palm.setGravity(Gravity.CENTER);
+
+        root.addView(palm);
+
+        TextView logo = text(
+                "DATRIDHA",
+                38,
+                WHITE,
+                true
+        );
+
+        logo.setGravity(Gravity.CENTER);
+
+        root.addView(logo);
+
+        TextView sub = text(
+                french ?
+                        "Deglet Nour de Bechni" :
                         "دقلة النور من بشني",
-                20,WHITE,true);
-        l.addView(name);
+                18,
+                GOLD,
+                true
+        );
 
-        TextView desc = tv(
-                french ? "Commerce direct de gros" :
-                        "تجارة مباشرة بالجملة",
-                16,WHITE,false);
-        l.addView(desc);
+        sub.setGravity(Gravity.CENTER);
+
+        root.addView(sub);
 
         Button start = button(
-                french ? "Commencer" : "ابدأ",
-                GOLD);
-        start.setTextColor(BROWN);
-        start.setOnClickListener(v -> showHome());
+                french ? "Entrer" : "الدخول",
+                GOLD
+        );
 
-        LinearLayout.LayoutParams p =
-                new LinearLayout.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT);
-        p.setMargins(30,30,30,10);
-        l.addView(start,p);
+        start.setOnClickListener(
+                v -> showHome()
+        );
 
-        setContentView(l);
+        root.addView(start);
     }
 
+    // =========================
+    // HOME
+    // =========================
+
     private void showHome() {
+
         base(
                 "🌴 DATRIDHA",
                 french ?
-                        "Deglet Nour de Bechni • Commerce de gros" :
-                        "دقلة النور من بشني • تجارة بالجملة");
+                        "Deglet Nour de Bechni" :
+                        "دقلة النور من بشني"
+        );
 
-        TextView welcome = tv(
+        TextView welcome = text(
                 french ?
-                        "Bienvenue sur DATRIDHA" :
-                        "مرحبًا بك في DATRIDHA",
-                22,GREEN,true);
+                        "Commerce direct de Deglet Nour en gros" :
+                        "تجارة دقلة النور بالجملة مباشرة من المنتج",
+                18,
+                BROWN,
+                true
+        );
+
+        welcome.setGravity(Gravity.CENTER);
+
         root.addView(welcome);
 
-        TextView info = cardText(
-                french ?
-                        "Achetez et vendez la Deglet Nour directement avec les producteurs." :
-                        "اشترِ وبِع دقلة النور مباشرة مع المنتجين.");
-        root.addView(info);
+        // BUY
 
         Button buy = button(
-                "🛒 " + (french ? "Acheter Deglet Nour" :
-                        "شراء دقلة النور"),
-                GREEN);
-        buy.setOnClickListener(v -> showBuy());
+                "🛒 " +
+                        (french ?
+                                "Acheter Deglet Nour" :
+                                "شراء دقلة النور"),
+                GREEN
+        );
+
+        buy.setOnClickListener(
+                v -> showBuy()
+        );
+
         root.addView(buy);
 
+        // SELL
+
         Button sell = button(
-                "📦 " + (french ? "Vendre Deglet Nour" :
-                        "بيع دقلة النور"),
-                GOLD);
+                "📦 " +
+                        (french ?
+                                "Vendre Deglet Nour" :
+                                "بيع دقلة النور"),
+                GOLD
+        );
+
         sell.setTextColor(BROWN);
-        sell.setOnClickListener(v -> showSell());
+
+        sell.setOnClickListener(
+                v -> showSell()
+        );
+
         root.addView(sell);
 
-        Button ordersBtn = button(
-                "📋 " + (french ? "Commandes" : "الطلبات"),
-                Color.rgb(52,102,160));
-        ordersBtn.setOnClickListener(v -> showOrders());
-        root.addView(ordersBtn);
+        // ORDERS
+
+        Button ordersButton = button(
+                "📋 " +
+                        (french ?
+                                "Mes commandes" :
+                                "الطلبات"),
+                LIGHT_GREEN
+        );
+
+        ordersButton.setOnClickListener(
+                v -> showOrders()
+        );
+
+        root.addView(ordersButton);
+
+        // CONTACT
 
         Button contact = button(
-                "☎ " + (french ? "Contact" : "تواصل معنا"),
-                BROWN);
-        contact.setOnClickListener(v -> showContact());
+                "☎ " +
+                        (french ?
+                                "Contact" :
+                                "تواصل معنا"),
+                BROWN
+        );
+
+        contact.setOnClickListener(
+                v -> showContact()
+        );
+
         root.addView(contact);
 
-        TextView products = tv(
-                french ? "Deglet Nour • Bechni" :
-                        "دقلة النور • بشني",
-                21,BROWN,true);
-        root.addView(products);
+        // PRODUCT CARD
 
-        root.addView(cardText(
-                french ?
-                        "Qualité • Origine Bechni • Vente en gros" :
-                        "جودة • منشأ بشني • بيع بالجملة"));
+        LinearLayout product = card();
 
-        root.addView(cardText(
-                "✓ " + (french ? "Fiable" : "موثوق") +
-                "    ✓ " + (french ? "Qualité" : "جودة")));
+        TextView ptitle = text(
+                "🌴 " +
+                        (french ?
+                                "Deglet Nour - Bechni" :
+                                "دقلة النور - بشني"),
+                20,
+                GREEN,
+                true
+        );
 
-        root.addView(cardText(
-                "✓ " + (french ? "Commerce direct" : "تجارة مباشرة") +
-                "    ✓ " + (french ? "Soutien aux producteurs" :
-                        "دعم المنتجين")));
+        product.addView(ptitle);
 
-        Button settings = button(
-                "⚙ " + (french ? "Paramètres" : "الإعدادات"),
-                Color.DKGRAY);
-        settings.setOnClickListener(v -> showSettings());
-        root.addView(settings);
+        product.addView(
+                cardText(
+                        french ?
+                                "Qualité supérieure • Vente en gros" :
+                                "جودة ممتازة • بيع بالجملة"
+                )
+        );
+
+        product.addView(
+                cardText(
+                        french ?
+                                "Origine : Bechni - El Fawar - Kebili" :
+                                "المصدر: بشني - الفوار - قبلي"
+                )
+        );
+
+        root.addView(product);
+
+        // TRUST BADGES
+
+        TextView badges = text(
+                "✓ " +
+                        (french ? "Fiable" : "موثوق") +
+                        "     •     " +
+                        "✓ " +
+                        (french ? "Qualité" : "جودة") +
+                        "     •     " +
+                        "✓ " +
+                        (french ? "Commerce direct" : "تجارة مباشرة"),
+                14,
+                GREEN,
+                true
+        );
+
+        badges.setGravity(Gravity.CENTER);
+
+        root.addView(badges);
 
         addBottomNav();
     }
 
+    // =========================
+    // BUY
+    // =========================
+
     private void showBuy() {
+
         base(
-                french ? "Acheter Deglet Nour" :
+                french ?
+                        "Acheter Deglet Nour" :
                         "شراء دقلة النور",
                 french ?
                         "Offres disponibles en gros" :
-                        "العروض المتوفرة للبيع بالجملة");
+                        "العروض المتوفرة بالجملة"
+        );
 
         EditText search = input(
-                french ? "Rechercher une offre..." :
-                        "ابحث عن عرض...");
+                french ?
+                        "Rechercher une offre..." :
+                        "ابحث عن عرض..."
+        );
+
         root.addView(search);
 
-        TextView filters = cardText(
+        TextView filters = text(
                 french ?
                         "Filtres : Toutes • Quantité • Prix • Région" :
-                        "الفلاتر: الكل • الكمية • السعر • المنطقة");
+                        "الفلاتر: الكل • الكمية • السعر • المنطقة",
+                14,
+                BROWN,
+                true
+        );
+
         root.addView(filters);
 
-        addOfferCard(
-                "🌴 Deglet Nour - Bechni",
+        // OFFER 1
+
+        LinearLayout offer1 = card();
+
+        offer1.addView(
+                text(
+                        "🌴 Deglet Nour - Bechni",
+                        19,
+                        GREEN,
+                        true
+                )
+        );
+
+        offer1.addView(
+                cardText(
+                        french ?
+                                "Quantité : 2 tonnes" :
+                                "الكمية: 2 طن"
+                )
+        );
+
+        offer1.addView(
+                cardText(
+                        french ?
+                                "Prix : Sur demande" :
+                                "السعر: عند الطلب"
+                )
+        );
+
+        offer1.addView(
+                cardText(
+                        french ?
+                                "Région : Bechni, Kebili" :
+                                "المنطقة: بشني، قبلي"
+                )
+        );
+
+        Button details = button(
                 french ?
-                        "Quantité : 5 tonnes\nPrix : après contact\nRégion : Bechni - Kebili" :
-                        "الكمية: 5 طن\nالسعر: بعد التواصل\nالمنطقة: بشني - قبلي");
-
-        addOfferCard(
-                "🌴 Deglet Nour - Qualité Premium",
-                french ?
-                        "Quantité : 2 tonnes\nPrix : après contact\nRégion : Kebili" :
-                        "الكمية: 2 طن\nالسعر: بعد التواصل\nالمنطقة: قبلي");
-
-        addOfferCard(
-                "🌴 Deglet Nour - Vente directe",
-                french ?
-                        "Quantité : 1 tonne\nPrix : après contact\nRégion : Bechni" :
-                        "الكمية: 1 طن\nالسعر: بعد التواصل\nالمنطقة: بشني");
-
-        addBottomNav();
-    }
-
-    private void addOfferCard(String title, String details) {
-        LinearLayout card = new LinearLayout(this);
-        card.setOrientation(LinearLayout.VERTICAL);
-        card.setPadding(16,16,16,16);
-        card.setBackground(bg(WHITE,24));
-
-        LinearLayout.LayoutParams cp =
-                new LinearLayout.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT);
-        cp.setMargins(0,8,0,8);
-        card.setLayoutParams(cp);
-
-        TextView t = tv(title,19,GREEN,true);
-        card.addView(t);
-
-        TextView d = tv(details,15,DARK,false);
-        d.setGravity(Gravity.CENTER);
-        card.addView(d);
-
-        Button detailsBtn = button(
-                french ? "Voir les détails" : "عرض التفاصيل",
-                GREEN);
-
-        detailsBtn.setOnClickListener(v -> showOfferDetails(title,details));
-        card.addView(detailsBtn);
-
-        root.addView(card);
-    }
-
-    private void showOfferDetails(String title,String details) {
-        base(
-                french ? "Détails de l'offre" :
+                        "Voir les détails" :
                         "تفاصيل العرض",
-                title);
+                GREEN
+        );
 
-        TextView image = tv("🌴🌴\n🌴  DATRIDHA  🌴\n🌴🌴",
-                25,GREEN,true);
-        image.setBackground(bg(WHITE,25));
-        root.addView(image);
+        details.setOnClickListener(
+                v -> showOfferDetails()
+        );
 
-        root.addView(cardText(details));
+        offer1.addView(details);
 
-        root.addView(cardText(
+        root.addView(offer1);
+
+        // OFFER 2
+
+        LinearLayout offer2 = card();
+
+        offer2.addView(
+                text(
+                        "🌴 Deglet Nour - Qualité Premium",
+                        19,
+                        GREEN,
+                        true
+                )
+        );
+
+        offer2.addView(
+                cardText(
+                        french ?
+                                "Quantité : 5 tonnes" :
+                                "الكمية: 5 طن"
+                )
+        );
+
+        offer2.addView(
+                cardText(
+                        french ?
+                                "Conditionnement : cartons" :
+                                "التعبئة: صناديق"
+                )
+        );
+
+        offer2.addView(
+                cardText(
+                        french ?
+                                "Origine : Bechni" :
+                                "المصدر: بشني"
+                )
+        );
+
+        Button details2 = button(
                 french ?
-                        "Origine : Bechni\nQualité : Deglet Nour\nConditionnement : selon accord" :
-                        "المنشأ: بشني\nالجودة: دقلة النور\nالتعبئة: حسب الاتفاق"));
+                        "Voir les détails" :
+                        "تفاصيل العرض",
+                LIGHT_GREEN
+        );
 
-        Button favorite = button(
-                "♡ " + (french ? "Ajouter aux favoris" :
-                        "إضافة إلى المفضلة"),
-                GOLD);
-        favorite.setTextColor(BROWN);
-        favorite.setOnClickListener(v ->
-                Toast.makeText(this,
-                        french ? "Ajouté aux favoris" :
-                                "تمت الإضافة إلى المفضلة",
-                        Toast.LENGTH_SHORT).show());
-        root.addView(favorite);
+        details2.setOnClickListener(
+                v -> showOfferDetails()
+        );
 
-        Button contact = button(
-                "☎ " + (french ? "Contacter le vendeur" :
-                        "التواصل مع صاحب العرض"),
-                GREEN);
-        contact.setOnClickListener(v -> showContact());
-        root.addView(contact);
+        offer2.addView(details2);
 
-        Button order = button(
-                "🛒 " + (french ? "Demander cet offre" :
-                        "طلب هذا العرض"),
-                BROWN);
-        order.setOnClickListener(v -> {
-            orders.add(title);
-            Toast.makeText(this,
-                    french ? "Demande enregistrée" :
-                            "تم تسجيل الطلب",
-                    Toast.LENGTH_SHORT).show();
-            showOrders();
-        });
-        root.addView(order);
+        root.addView(offer2);
 
         addBottomNav();
     }
+
+    // =========================
+    // SELL
+    // =========================
 
     private void showSell() {
+
         base(
-                french ? "Vendre Deglet Nour" :
-                        "بيع دقلة النور",
                 french ?
-                        "Publiez votre offre de vente en gros" :
-                        "انشر عرضك للبيع بالجملة");
+                        "Publier une offre" :
+                        "نشر عرض بيع",
+                french ?
+                        "Proposez votre Deglet Nour" :
+                        "اعرض دقلة النور للبيع"
+        );
 
         EditText name = input(
-                french ? "Nom du vendeur / société" :
-                        "اسم البائع / الشركة");
+                french ?
+                        "Nom du vendeur / entreprise" :
+                        "اسم البائع / الشركة"
+        );
+
         root.addView(name);
 
         EditText quantity = input(
-                french ? "Quantité disponible (kg / tonnes)" :
-                        "الكمية المتوفرة (كغ / طن)");
+                french ?
+                        "Quantité en tonnes" :
+                        "الكمية بالطن"
+        );
+
         root.addView(quantity);
 
         EditText price = input(
-                french ? "Prix demandé (DT / kg)" :
-                        "السعر المطلوب (د.ت / كغ)");
+                french ?
+                        "Prix par kg" :
+                        "السعر للكيلوغرام"
+        );
+
         root.addView(price);
 
         EditText phone = input(
-                french ? "Numéro de téléphone" :
-                        "رقم الهاتف");
+                french ?
+                        "Numéro de téléphone" :
+                        "رقم الهاتف"
+        );
+
         root.addView(phone);
 
         EditText description = input(
                 french ?
-                        "Description : qualité, conditionnement, conditions..." :
-                        "الوصف: الجودة، التعبئة، شروط البيع...");
+                        "Qualité, emballage et conditions..." :
+                        "الجودة، التعبئة والشروط..."
+        );
+
+        description.setMinLines(4);
+
         root.addView(description);
 
-        Button photo = button(
-                "📷 " + (french ? "Ajouter des photos" :
-                        "إضافة صور"),
-                Color.rgb(110,70,130));
-        photo.setOnClickListener(v -> {
-            Intent i = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-            i.setType("image/*");
-            i.putExtra(Intent.EXTRA_ALLOW_MULTIPLE,true);
-            i.addCategory(Intent.CATEGORY_OPENABLE);
-            try {
-                startActivityForResult(i,100);
-            } catch(Exception e) {
-                Toast.makeText(this,
-                        french ? "Impossible d'ouvrir les photos" :
-                                "تعذر فتح الصور",
-                        Toast.LENGTH_SHORT).show();
-            }
-        });
-        root.addView(photo);
+        Button photos = button(
+                "📷 " +
+                        (french ?
+                                "Ajouter des photos" :
+                                "إضافة صور"),
+                BROWN
+        );
+
+        photos.setOnClickListener(
+                v -> choosePhotos()
+        );
+
+        root.addView(photos);
 
         Button publish = button(
-                "✓ " + (french ? "Publier l'offre" :
-                        "نشر العرض"),
-                GREEN);
+                "✓ " +
+                        (french ?
+                                "Publier l'offre" :
+                                "نشر العرض"),
+                GREEN
+        );
 
         publish.setOnClickListener(v -> {
-            if (name.getText().toString().trim().isEmpty() ||
-                quantity.getText().toString().trim().isEmpty() ||
-                phone.getText().toString().trim().isEmpty()) {
 
-                Toast.makeText(this,
-                        french ?
-                                "Veuillez remplir les champs obligatoires" :
-                                "يرجى ملء الخانات الإلزامية",
-                        Toast.LENGTH_LONG).show();
-                return;
-            }
-
-            Toast.makeText(this,
+            Toast.makeText(
+                    this,
                     french ?
-                            "Votre offre a été enregistrée" :
-                            "تم تسجيل عرضك بنجاح",
-                    Toast.LENGTH_LONG).show();
+                            "Offre publiée avec succès" :
+                            "تم نشر العرض بنجاح",
+                    Toast.LENGTH_LONG
+            ).show();
 
             showHome();
         });
@@ -520,73 +713,194 @@ public class MainActivity extends Activity {
         addBottomNav();
     }
 
-    private void showOrders() {
-        base(
-                french ? "Commandes" : "الطلبات",
-                french ?
-                        "Historique et suivi de vos demandes" :
-                        "متابعة وتاريخ طلباتك");
+    // =========================
+    // PHOTO PICKER
+    // =========================
 
-        root.addView(cardText(
-                french ?
-                        "Filtres : Toutes • En cours • Reçues" :
-                        "الفلاتر: الكل • قيد التنفيذ • مستلمة"));
+    private void choosePhotos() {
 
-        if (orders.size() == 0) {
-            root.addView(cardText(
+        Intent intent = new Intent(
+                Intent.ACTION_OPEN_DOCUMENT
+        );
+
+        intent.setType("image/*");
+
+        intent.putExtra(
+                Intent.EXTRA_ALLOW_MULTIPLE,
+                true
+        );
+
+        intent.addCategory(
+                Intent.CATEGORY_OPENABLE
+        );
+
+        try {
+
+            startActivityForResult(
+                    intent,
+                    100
+            );
+
+        } catch (Exception e) {
+
+            Toast.makeText(
+                    this,
                     french ?
-                            "Aucune commande pour le moment." :
-                            "لا توجد طلبات حاليًا."));
+                            "Impossible d'ouvrir les photos" :
+                            "تعذر فتح الصور",
+                    Toast.LENGTH_SHORT
+            ).show();
+        }
+    }
+
+    // =========================
+    // ORDERS
+    // =========================
+
+    private void showOrders() {
+
+        base(
+                french ?
+                        "Mes commandes" :
+                        "الطلبات",
+                french ?
+                        "Historique et suivi" :
+                        "متابعة الطلبات والسجل"
+        );
+
+        TextView filter = text(
+                french ?
+                        "Toutes • En cours • Acceptées • Reçues" :
+                        "الكل • قيد التنفيذ • مقبولة • مستلمة",
+                14,
+                BROWN,
+                true
+        );
+
+        filter.setGravity(Gravity.CENTER);
+
+        root.addView(filter);
+
+        if (orders.isEmpty()) {
+
+            root.addView(
+                    cardText(
+                            french ?
+                                    "Aucune commande." :
+                                    "لا توجد طلبات حاليًا."
+                    )
+            );
+
         } else {
+
             for (String order : orders) {
-                root.addView(cardText(
-                        "🌴 " + order +
-                        "\n" +
-                        (french ?
-                                "Statut : En attente" :
-                                "الحالة: في الانتظار")));
+
+                LinearLayout c = card();
+
+                c.addView(
+                        text(
+                                "📦 " + order,
+                                17,
+                                GREEN,
+                                true
+                        )
+                );
+
+                Button view = button(
+                        french ?
+                                "Voir" :
+                                "عرض",
+                        LIGHT_GREEN
+                );
+
+                view.setOnClickListener(
+                        v -> showOfferDetails()
+                );
+
+                c.addView(view);
+
+                root.addView(c);
             }
         }
-
-        root.addView(cardText(
-                "🔵 " + (french ? "En cours" : "قيد التنفيذ") +
-                "\n🟢 " + (french ? "Acceptée" : "مقبولة") +
-                "\n🟡 " + (french ? "En attente" : "في الانتظار")));
 
         addBottomNav();
     }
 
-    private void showContact() {
-        base(
-                french ? "Contact" : "تواصل معنا",
-                french ?
-                        "L'équipe DATRIDHA est à votre disposition"
-);
-        
-        root.addView(cardText(
-                "📞 +216 51022448"
-        ));
+    // =========================
+    // CONTACT
+    // =========================
 
-        root.addView(cardText(
-                "✉ ridhatouil1992@gmail.com"
-        ));
+    private void showContact() {
+
+        base(
+                french ?
+                        "Contact" :
+                        "تواصل معنا",
+                french ?
+                        "L'équipe DATRIDHA est à votre disposition" :
+                        "فريق DATRIDHA في خدمتكم"
+        );
+
+        LinearLayout contactCard = card();
+
+        contactCard.addView(
+                text(
+                        "📞 +216 51022448",
+                        18,
+                        GREEN,
+                        true
+                )
+        );
+
+        contactCard.addView(
+                text(
+                        "✉ ridhatouil1992@gmail.com",
+                        16,
+                        BROWN,
+                        false
+                )
+        );
+
+        contactCard.addView(
+                text(
+                        french ?
+                                "DATRIDHA - Deglet Nour de Bechni" :
+                                "DATRIDHA - دقلة النور من بشني",
+                        16,
+                        DARK,
+                        true
+                )
+        );
+
+        root.addView(contactCard);
 
         Button call = button(
-                "📞 " + (french ? "Appeler" : "اتصال"),
+                "📞 " +
+                        (french ?
+                                "Appeler" :
+                                "اتصال"),
                 GREEN
         );
 
         call.setOnClickListener(v -> {
+
             try {
+
                 Intent intent = new Intent(
                         Intent.ACTION_DIAL,
-                        Uri.parse("tel:+21651022448")
+                        Uri.parse(
+                                "tel:+21651022448"
+                        )
                 );
+
                 startActivity(intent);
+
             } catch (Exception e) {
+
                 Toast.makeText(
                         this,
-                        french ? "Impossible d'ouvrir le téléphone" :
+                        french ?
+                                "Impossible d'ouvrir le téléphone" :
                                 "تعذر فتح الهاتف",
                         Toast.LENGTH_SHORT
                 ).show();
@@ -596,21 +910,36 @@ public class MainActivity extends Activity {
         root.addView(call);
 
         Button email = button(
-                "✉ " + (french ? "Envoyer un email" : "إرسال بريد إلكتروني"),
+                "✉ " +
+                        (french ?
+                                "Envoyer un email" :
+                                "إرسال بريد إلكتروني"),
                 BROWN
         );
 
         email.setOnClickListener(v -> {
+
             try {
-                Intent intent = new Intent(Intent.ACTION_SENDTO);
-                intent.setData(Uri.parse(
-                        "mailto:ridhatouil1992@gmail.com"
-                ));
+
+                Intent intent =
+                        new Intent(
+                                Intent.ACTION_SENDTO
+                        );
+
+                intent.setData(
+                        Uri.parse(
+                                "mailto:ridhatouil1992@gmail.com"
+                        )
+                );
+
                 startActivity(intent);
+
             } catch (Exception e) {
+
                 Toast.makeText(
                         this,
-                        french ? "Impossible d'ouvrir l'email" :
+                        french ?
+                                "Impossible d'ouvrir l'email" :
                                 "تعذر فتح البريد الإلكتروني",
                         Toast.LENGTH_SHORT
                 ).show();
@@ -622,49 +951,428 @@ public class MainActivity extends Activity {
         addBottomNav();
     }
 
+    // =========================
+    // SETTINGS
+    // =========================
+
     private void showSettings() {
+
         base(
-                french ? "Paramètres" : "الإعدادات",
-                french ? "Personnalisez votre application" :
-                        "تخصيص التطبيق"
+                french ?
+                        "Paramètres" :
+                        "الإعدادات",
+                french ?
+                        "Personnalisez DATRIDHA" :
+                        "تخصيص تطبيق DATRIDHA"
         );
 
-        root.addView(cardText(
-                "🌐 " + (french ? "Langue : Français / Arabe" :
-                        "اللغة: العربية / الفرنسية")
-        ));
+        LinearLayout languageCard = card();
+
+        languageCard.addView(
+                text(
+                        "🌐 " +
+                                (french ?
+                                        "Langue" :
+                                        "اللغة"),
+                        18,
+                        GREEN,
+                        true
+                )
+        );
 
         Button language = button(
-                french ? "العربية" : "Français",
+                french ?
+                        "العربية" :
+                        "Français",
                 LIGHT_GREEN
         );
 
         language.setOnClickListener(v -> {
+
             french = !french;
+
             showSettings();
         });
 
-        root.addView(language);
+        languageCard.addView(language);
 
-        root.addView(cardText(
-                "🔔 " + (french ? "Notifications" : "الإشعارات")
-        ));
+        root.addView(languageCard);
 
-        root.addView(cardText(
-                "ℹ " + (french ? "À propos de DATRIDHA" :
-                        "حول DATRIDHA")
-        ));
+        LinearLayout notification = card();
 
-        root.addView(cardText(
-                "🔒 " + (french ? "Confidentialité" : "الخصوصية")
-        ));
+        notification.addView(
+                text(
+                        "🔔 " +
+                                (french ?
+                                        "Notifications" :
+                                        "الإشعارات"),
+                        17,
+                        DARK,
+                        true
+                )
+        );
 
-        root.addView(cardText(
-                "❓ " + (french ? "Aide" : "المساعدة")
-        ));
+        Switch notificationSwitch =
+                new Switch(this);
+
+        notificationSwitch.setText(
+                french ?
+                        "Activer les notifications" :
+                        "تفعيل الإشعارات"
+        );
+
+        notification.addView(
+                notificationSwitch
+        );
+
+        root.addView(notification);
+
+        LinearLayout about = card();
+
+        about.addView(
+                text(
+                        "ℹ " +
+                                (french ?
+                                        "À propos de DATRIDHA" :
+                                        "حول DATRIDHA"),
+                        17,
+                        GREEN,
+                        true
+                )
+        );
+
+        about.addView(
+                cardText(
+                        french ?
+                                "Plateforme de commerce en gros de Deglet Nour de Bechni." :
+                                "منصة لتجارة دقلة النور بالجملة من بشني."
+                )
+        );
+
+        root.addView(about);
+
+        LinearLayout privacy = card();
+
+        privacy.addView(
+                text(
+                        "🔒 " +
+                                (french ?
+                                        "Confidentialité" :
+                                        "الخصوصية"),
+                        17,
+                        DARK,
+                        true
+                )
+        );
+
+        root.addView(privacy);
+
+        LinearLayout help = card();
+
+        help.addView(
+                text(
+                        "❓ " +
+                                (french ?
+                                        "Aide" :
+                                        "المساعدة"),
+                        17,
+                        DARK,
+                        true
+                )
+        );
+
+        root.addView(help);
 
         addBottomNav();
     }
+
+    // =========================
+    // OFFER DETAILS
+    // =========================
+
+    private void showOfferDetails() {
+
+        base(
+                french ?
+                        "Détails de l'offre" :
+                        "تفاصيل العرض",
+                french ?
+                        "Deglet Nour - Bechni" :
+                        "دقلة النور - بشني"
+        );
+
+        LinearLayout product = card();
+
+        TextView image = text(
+                "🌴🌴🌴\n🌴  D E G L E T   N O U R  🌴\n🌴🌴🌴",
+                24,
+                GREEN,
+                true
+        );
+
+        image.setGravity(Gravity.CENTER);
+        image.setPadding(10, 40, 10, 40);
+
+        product.addView(image);
+
+        product.addView(
+                text(
+                        french ?
+                                "Deglet Nour - Bechni" :
+                                "دقلة النور - بشني",
+                        23,
+                        GREEN,
+                        true
+                )
+        );
+
+        product.addView(
+                cardText(
+                        french ?
+                                "Prix : Sur demande" :
+                                "السعر: عند الطلب"
+                )
+        );
+
+        product.addView(
+                cardText(
+                        french ?
+                                "Quantité : 2 tonnes" :
+                                "الكمية: 2 طن"
+                )
+        );
+
+        product.addView(
+                cardText(
+                        french ?
+                                "Origine : Bechni - Kebili" :
+                                "المصدر: بشني - قبلي"
+                )
+        );
+
+        product.addView(
+                cardText(
+                        french ?
+                                "Qualité : Premium" :
+                                "الجودة: ممتازة"
+                )
+        );
+
+        product.addView(
+                cardText(
+                        french ?
+                                "Conditionnement : selon demande" :
+                                "التعبئة: حسب الطلب"
+                )
+        );
+
+        root.addView(product);
+
+        Button favorite = button(
+                "♡ " +
+                        (french ?
+                                "Ajouter aux favoris" :
+                                "إضافة إلى المفضلة"),
+                GOLD
+        );
+
+        favorite.setTextColor(BROWN);
+
+        favorite.setOnClickListener(v -> {
+
+            Toast.makeText(
+                    this,
+                    french ?
+                            "Ajouté aux favoris" :
+                            "تمت الإضافة إلى المفضلة",
+                    Toast.LENGTH_SHORT
+            ).show();
+        });
+
+        root.addView(favorite);
+
+        Button contactOwner = button(
+                "☎ " +
+                        (french ?
+                                "Contacter le vendeur" :
+                                "التواصل مع صاحب العرض"),
+                GREEN
+        );
+
+        contactOwner.setOnClickListener(
+                v -> showContact()
+        );
+
+        root.addView(contactOwner);
+
+        Button order = button(
+                "🛒 " +
+                        (french ?
+                                "Commander" :
+                                "طلب هذه الكمية"),
+                BROWN
+        );
+
+        order.setOnClickListener(v -> {
+
+            orders.add(
+                    french ?
+                            "Nouvelle commande - 2 tonnes - En cours" :
+                            "طلب جديد - 2 طن - قيد التنفيذ"
+            );
+
+            Toast.makeText(
+                    this,
+                    french ?
+                            "Commande enregistrée" :
+                            "تم تسجيل الطلب",
+                    Toast.LENGTH_LONG
+            ).show();
+
+            showOrders();
+        });
+
+        root.addView(order);
+
+        addBottomNav();
+    }
+
+    // =========================
+    // BOTTOM NAVIGATION
+    // =========================
+
+    private void addBottomNav() {
+
+        LinearLayout nav = new LinearLayout(this);
+
+        nav.setOrientation(
+                LinearLayout.HORIZONTAL
+        );
+
+        nav.setGravity(
+                Gravity.CENTER
+        );
+
+        nav.setPadding(
+                5,
+                8,
+                5,
+                8
+        );
+
+        nav.setBackgroundColor(
+                GREEN
+        );
+
+        Button home = navButton(
+                "⌂",
+                french ?
+                        "Accueil" :
+                        "الرئيسية"
+        );
+
+        home.setOnClickListener(
+                v -> showHome()
+        );
+
+        nav.addView(home);
+
+        Button buy = navButton(
+                "🛒",
+                french ?
+                        "Acheter" :
+                        "شراء"
+        );
+
+        buy.setOnClickListener(
+                v -> showBuy()
+        );
+
+        nav.addView(buy);
+
+        Button order = navButton(
+                "📋",
+                french ?
+                        "Commandes" :
+                        "الطلبات"
+        );
+
+        order.setOnClickListener(
+                v -> showOrders()
+        );
+
+        nav.addView(order);
+
+        Button contact = navButton(
+                "☎",
+                french ?
+                        "Contact" :
+                        "تواصل"
+        );
+
+        contact.setOnClickListener(
+                v -> showContact()
+        );
+
+        nav.addView(contact);
+
+        Button settings = navButton(
+                "⚙",
+                french ?
+                        "Réglages" :
+                        "الإعدادات"
+        );
+
+        settings.setOnClickListener(
+                v -> showSettings()
+        );
+
+        nav.addView(settings);
+
+        root.addView(nav);
+    }
+
+    private Button navButton(
+            String icon,
+            String title
+    ) {
+
+        Button b = new Button(this);
+
+        b.setText(
+                icon + "\n" + title
+        );
+
+        b.setTextColor(WHITE);
+        b.setTextSize(11);
+        b.setAllCaps(false);
+        b.setBackgroundColor(GREEN);
+
+        b.setGravity(
+                Gravity.CENTER
+        );
+
+        b.setPadding(
+                4,
+                4,
+                4,
+                4
+        );
+
+        b.setLayoutParams(
+                new LinearLayout.LayoutParams(
+                        0,
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        1
+                )
+        );
+
+        return b;
+    }
+
+    // =========================
+    // ACTIVITY RESULT
+    // =========================
 
     @Override
     protected void onActivityResult(
@@ -672,12 +1380,22 @@ public class MainActivity extends Activity {
             int resultCode,
             Intent data
     ) {
-        super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == 100 && resultCode == RESULT_OK) {
+        super.onActivityResult(
+                requestCode,
+                resultCode,
+                data
+        );
+
+        if (
+                requestCode == 100 &&
+                resultCode == RESULT_OK
+        ) {
+
             Toast.makeText(
                     this,
-                    french ? "Photos sélectionnées" :
+                    french ?
+                            "Photos sélectionnées" :
                             "تم اختيار الصور",
                     Toast.LENGTH_SHORT
             ).show();
