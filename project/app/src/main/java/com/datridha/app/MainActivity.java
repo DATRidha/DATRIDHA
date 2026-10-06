@@ -160,12 +160,16 @@ public class MainActivity extends Activity {
     void showHome() {
 
         root = vertical();
-        root.setBackground(CREAM);
+
+        // FIXED: setBackground needs Drawable
+        root.setBackground(bg(CREAM, 0));
 
         // TOP BAR
         LinearLayout top = horizontal();
         top.setPadding(14, 10, 14, 6);
-        top.setBackground(WHITE);
+
+        // FIXED: setBackground needs Drawable
+        top.setBackground(bg(WHITE, 0));
 
         TextView miniLogo = text(
                 "🌴 DATRIDHA",
@@ -210,6 +214,7 @@ public class MainActivity extends Activity {
                 GREEN,
                 false
         );
+
         palm.setGravity(Gravity.CENTER);
         hero.addView(palm);
 
@@ -219,6 +224,7 @@ public class MainActivity extends Activity {
                 DARK_BROWN,
                 true
         );
+
         brand.setGravity(Gravity.CENTER);
         hero.addView(brand);
 
@@ -230,6 +236,7 @@ public class MainActivity extends Activity {
                 GREEN,
                 true
         );
+
         line.setGravity(Gravity.CENTER);
         hero.addView(line);
 
@@ -241,6 +248,7 @@ public class MainActivity extends Activity {
                 BROWN,
                 true
         );
+
         slogan.setGravity(Gravity.CENTER);
         hero.addView(slogan);
 
@@ -265,7 +273,9 @@ public class MainActivity extends Activity {
         // BOTTOM NAVIGATION
         LinearLayout nav = horizontal();
         nav.setPadding(6, 7, 6, 7);
-        nav.setBackground(WHITE);
+
+        // FIXED: setBackground needs Drawable
+        nav.setBackground(bg(WHITE, 0));
 
         Button buy = button(
                 french ? "🛒\nAcheter" : "🛒\nشراء",
@@ -353,7 +363,7 @@ public class MainActivity extends Activity {
 
         space(content, 16);
 
-        // BUY
+        // BUY CARD
         LinearLayout buyCard = card();
 
         TextView buyTitle = text(
@@ -395,7 +405,7 @@ public class MainActivity extends Activity {
 
         space(content, 12);
 
-        // SELL
+        // SELL CARD
         LinearLayout sellCard = card();
 
         TextView sellTitle = text(
