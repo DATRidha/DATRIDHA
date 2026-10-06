@@ -11,39 +11,78 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Check Android project
+      - name: Prepare Android project
         run: |
           set -e
 
+          rm -rf build_project
+
+          unzip -q DATRIDHA_project_COLORED_FUNCTIONAL_FINAL.zip -d build_project
+
           echo "========================================"
-          echo "CHECKING DATRIDHA PROJECT"
+          echo "PROJECT EXTRACTED"
           echo "========================================"
 
-          if [ ! -f "project/settings.gradle" ] && [ ! -f "project/settings.gradle.kts" ]; then
-            echo "ERROR: Android project not found in project/"
-            echo ""
-            echo "Available files:"
-            find . -maxdepth 4 -type f | sort
+          find build_project -type f | sort
+
+      - name: Install new MainActivity
+        run: |
+          set -e
+
+          SOURCE="project/app/src/main/java/com/datridha/app/MainActivity.java"
+
+          if [ ! -f "$SOURCE" ]; then
+            echo "ERROR: New MainActivity.java not found"
             exit 1
           fi
 
-          echo ""
-          echo "MainActivity:"
-          find project -type f -name "MainActivity.java" -print
+          TARGET=$(find build_project -type f -name "MainActivity.java" | head -1)
+
+          if [ -z "$TARGET" ]; then
+            echo "ERROR: MainActivity.java not found inside ZIP"
+            exit 1
+          fi
+
+          echo "========================================"
+          echo "NEW MAIN ACTIVITY"
+          echo "========================================"
+
+          echo "SOURCE:"
+          echo "$SOURCE"
+
+          echo "TARGET:"
+          echo "$TARGET"
+
+          cp "$SOURCE" "$TARGET"
 
           echo ""
-          echo "MainActivity size:"
-          wc -c project/app/src/main/java/com/datridha/app/MainActivity.java
+          echo "NEW FILE SIZE:"
+          wc -c "$TARGET"
 
-      - name: Show MainActivity
+          echo ""
+          echo "FIRST 30 LINES:"
+          head -30 "$TARGET"
+
+      - name: Find Gradle project
         run: |
           set -e
 
+          SETTINGS=$(find build_project -type f \
+            \( -name "settings.gradle" -o -name "settings.gradle.kts" \) \
+            -print -quit)
+
+          if [ -z "$SETTINGS" ]; then
+            echo "ERROR: Gradle project not found"
+            exit 1
+          fi
+
+          PROJECT_DIR=$(dirname "$SETTINGS")
+
           echo "========================================"
-          echo "USING CURRENT MAIN ACTIVITY"
+          echo "GRADLE PROJECT"
           echo "========================================"
 
-          head -30 project/app/src/main/java/com/datridha/app/MainActivity.java
+          echo "$PROJECT_DIR"
 
       - name: Set up Java 17
         uses: actions/setup-java@v5
@@ -56,41 +95,44 @@ jobs:
         with:
           gradle-version: '8.2'
 
-      - name: Build DATRIDHA
+      - name: Build APK
         run: |
           set -e
 
+          SETTINGS=$(find build_project -type f \
+            \( -name "settings.gradle" -o -name "settings.gradle.kts" \) \
+            -print -quit)
+
+          PROJECT_DIR=$(dirname "$SETTINGS")
+
           echo "========================================"
-          echo "BUILDING CURRENT PROJECT"
+          echo "BUILDING DATRIDHA"
           echo "========================================"
 
-          gradle -p project clean assembleDebug
+          gradle -p "$PROJECT_DIR" clean assembleDebug
 
       - name: Find APK
         run: |
           set -e
 
-          echo "========================================"
-          echo "APK"
-          echo "========================================"
-
-          APK=$(find project -type f -name "app-debug.apk" | head -1)
+          APK=$(find build_project -type f \
+            -name "app-debug.apk" | head -1)
 
           if [ -z "$APK" ]; then
             echo "ERROR: APK not found"
             exit 1
           fi
 
-          echo "APK:"
-          echo "$APK"
+          echo "========================================"
+          echo "APK CREATED"
+          echo "========================================"
 
-          echo ""
-          echo "SIZE:"
+          echo "$APK"
           ls -lh "$APK"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: DATRIDHA-FINAL-8-PAGES
-          path: project/app/build/outputs/apk/debug/app-debug.apk
+          path: build_project/**/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
