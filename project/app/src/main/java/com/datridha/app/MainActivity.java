@@ -561,3 +561,126 @@ public class MainActivity extends Activity {
                 french ? "Contact" : "تواصل معنا",
                 french ?
                         "L'équipe DATRIDHA est à votre disposition"
+);
+        
+        root.addView(cardText(
+                "📞 +216 51022448"
+        ));
+
+        root.addView(cardText(
+                "✉ ridhatouil1992@gmail.com"
+        ));
+
+        Button call = button(
+                "📞 " + (french ? "Appeler" : "اتصال"),
+                GREEN
+        );
+
+        call.setOnClickListener(v -> {
+            try {
+                Intent intent = new Intent(
+                        Intent.ACTION_DIAL,
+                        Uri.parse("tel:+21651022448")
+                );
+                startActivity(intent);
+            } catch (Exception e) {
+                Toast.makeText(
+                        this,
+                        french ? "Impossible d'ouvrir le téléphone" :
+                                "تعذر فتح الهاتف",
+                        Toast.LENGTH_SHORT
+                ).show();
+            }
+        });
+
+        root.addView(call);
+
+        Button email = button(
+                "✉ " + (french ? "Envoyer un email" : "إرسال بريد إلكتروني"),
+                BROWN
+        );
+
+        email.setOnClickListener(v -> {
+            try {
+                Intent intent = new Intent(Intent.ACTION_SENDTO);
+                intent.setData(Uri.parse(
+                        "mailto:ridhatouil1992@gmail.com"
+                ));
+                startActivity(intent);
+            } catch (Exception e) {
+                Toast.makeText(
+                        this,
+                        french ? "Impossible d'ouvrir l'email" :
+                                "تعذر فتح البريد الإلكتروني",
+                        Toast.LENGTH_SHORT
+                ).show();
+            }
+        });
+
+        root.addView(email);
+
+        addBottomNav();
+    }
+
+    private void showSettings() {
+        base(
+                french ? "Paramètres" : "الإعدادات",
+                french ? "Personnalisez votre application" :
+                        "تخصيص التطبيق"
+        );
+
+        root.addView(cardText(
+                "🌐 " + (french ? "Langue : Français / Arabe" :
+                        "اللغة: العربية / الفرنسية")
+        ));
+
+        Button language = button(
+                french ? "العربية" : "Français",
+                LIGHT_GREEN
+        );
+
+        language.setOnClickListener(v -> {
+            french = !french;
+            showSettings();
+        });
+
+        root.addView(language);
+
+        root.addView(cardText(
+                "🔔 " + (french ? "Notifications" : "الإشعارات")
+        ));
+
+        root.addView(cardText(
+                "ℹ " + (french ? "À propos de DATRIDHA" :
+                        "حول DATRIDHA")
+        ));
+
+        root.addView(cardText(
+                "🔒 " + (french ? "Confidentialité" : "الخصوصية")
+        ));
+
+        root.addView(cardText(
+                "❓ " + (french ? "Aide" : "المساعدة")
+        ));
+
+        addBottomNav();
+    }
+
+    @Override
+    protected void onActivityResult(
+            int requestCode,
+            int resultCode,
+            Intent data
+    ) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == 100 && resultCode == RESULT_OK) {
+            Toast.makeText(
+                    this,
+                    french ? "Photos sélectionnées" :
+                            "تم اختيار الصور",
+                    Toast.LENGTH_SHORT
+            ).show();
+        }
+    }
+}
