@@ -20,53 +20,27 @@ jobs:
           unzip -q DATRIDHA_project_COLORED_FUNCTIONAL_FINAL.zip -d project
 
           echo "========================================"
-          echo "EXTRACTED PROJECT"
+          echo "PROJECT FILES"
           echo "========================================"
 
-          find project -type f -name "settings.gradle*" -print
-          find project -type f -name "AndroidManifest.xml" -print
+          find project -type f | sort
 
-      - name: Install the latest MainActivity
+      - name: Locate MainActivity
         run: |
           set -e
 
-          SOURCE="project/app/src/main/java/com/datridha/app/MainActivity.java"
-
-          if [ ! -f "$SOURCE" ]; then
-            echo "ERROR: GitHub MainActivity.java not found:"
-            echo "$SOURCE"
-            exit 1
-          fi
-
-          TARGET=$(find project -type f -path "*/app/src/main/java/com/datridha/app/MainActivity.java" | head -1)
+          TARGET=$(find project -type f -name "MainActivity.java" | head -1)
 
           if [ -z "$TARGET" ]; then
-            echo "ERROR: Extracted MainActivity.java not found"
+            echo "ERROR: MainActivity.java not found inside ZIP"
+            find project -type f -name "*.java" -print
             exit 1
           fi
 
-          echo "SOURCE:"
-          echo "$SOURCE"
-
-          echo "TARGET:"
-          echo "$TARGET"
-
-          cp "$SOURCE" "$TARGET"
-
-          echo ""
-          echo "MainActivity installed successfully."
-
-      - name: Verify MainActivity
-        run: |
-          set -e
-
-          TARGET=$(find project -type f -path "*/app/src/main/java/com/datridha/app/MainActivity.java" | head -1)
-
           echo "========================================"
-          echo "MAIN ACTIVITY USED FOR BUILD"
+          echo "MAIN ACTIVITY FOUND"
           echo "========================================"
 
-          echo "FILE:"
           echo "$TARGET"
 
           echo ""
@@ -74,39 +48,25 @@ jobs:
           wc -c "$TARGET"
 
           echo ""
-          echo "IMPORTS:"
-          head -30 "$TARGET"
+          echo "FIRST 40 LINES:"
+          head -40 "$TARGET"
 
-          echo ""
-          echo "PAGE METHODS:"
-          grep -n -E "showHome|showBuy|showSell|showOrders|showContact|showSettings|showAbout|showDetails" "$TARGET" || true
-
-          echo ""
-          echo "VIEWGROUP:"
-          grep -n "import android.view.ViewGroup;" "$TARGET" || true
-
-          echo ""
-          echo "DATRIDHA:"
-          grep -n "DATRIDHA" "$TARGET" | head -20 || true
-
-      - name: Inspect Android project
+      - name: Inspect project
         run: |
           echo "========================================"
-          echo "ANDROID PROJECT"
-          echo "========================================"
-
-          find project -type f -name "settings.gradle*" -print
-          find project -type f -name "build.gradle*" -print
-          find project -type f -name "AndroidManifest.xml" -print
-
-          echo ""
-          echo "========================================"
-          echo "JAVA AND XML FILES"
+          echo "GRADLE FILES"
           echo "========================================"
 
           find project -type f \
-            \( -name "*.java" -o -name "*.xml" \) \
-            -print | sort
+            \( -name "settings.gradle" -o -name "settings.gradle.kts" -o -name "build.gradle" -o -name "build.gradle.kts" \) \
+            -print
+
+          echo ""
+          echo "========================================"
+          echo "ANDROID MANIFEST"
+          echo "========================================"
+
+          find project -type f -name "AndroidManifest.xml" -print
 
       - name: Set up Java 17
         uses: actions/setup-java@v5
@@ -123,43 +83,51 @@ jobs:
         run: |
           set -e
 
-          PROJECT_DIR=$(dirname "$(find project -type f \( -name settings.gradle -o -name settings.gradle.kts \) -print -quit)")
+          SETTINGS=$(find project -type f \
+            \( -name "settings.gradle" -o -name "settings.gradle.kts" \) \
+            -print -quit)
 
-          if [ -z "$PROJECT_DIR" ]; then
-            echo "ERROR: Gradle project not found"
+          if [ -z "$SETTINGS" ]; then
+            echo "ERROR: settings.gradle not found"
             exit 1
           fi
 
-          echo "Gradle project:"
+          PROJECT_DIR=$(dirname "$SETTINGS")
+
+          echo "========================================"
+          echo "GRADLE PROJECT"
+          echo "========================================"
+
           echo "$PROJECT_DIR"
 
       - name: Build APK
         run: |
           set -e
 
-          PROJECT_DIR=$(dirname "$(find project -type f \( -name settings.gradle -o -name settings.gradle.kts \) -print -quit)")
+          SETTINGS=$(find project -type f \
+            \( -name "settings.gradle" -o -name "settings.gradle.kts" \) \
+            -print -quit)
+
+          PROJECT_DIR=$(dirname "$SETTINGS")
 
           echo "========================================"
           echo "BUILDING DATRIDHA"
           echo "========================================"
 
-          echo "Project:"
-          echo "$PROJECT_DIR"
-
           gradle -p "$PROJECT_DIR" clean assembleDebug
 
-      - name: Verify APK
+      - name: Find APK
         run: |
           set -e
 
           echo "========================================"
-          echo "APK FILE"
+          echo "APK"
           echo "========================================"
 
           APK=$(find project -type f -name "app-debug.apk" | head -1)
 
           if [ -z "$APK" ]; then
-            echo "ERROR: APK was not generated"
+            echo "ERROR: app-debug.apk not found"
             exit 1
           fi
 
