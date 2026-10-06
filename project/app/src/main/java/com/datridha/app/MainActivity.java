@@ -7,7 +7,6 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
-import android.provider.Settings;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.*;
@@ -21,15 +20,17 @@ public class MainActivity extends Activity {
 
     ArrayList<String> orders = new ArrayList<>();
 
-    int brown = Color.rgb(82, 45, 20);
-    int darkBrown = Color.rgb(55, 30, 15);
-    int gold = Color.rgb(218, 164, 57);
-    int green = Color.rgb(42, 105, 52);
-    int darkGreen = Color.rgb(28, 73, 36);
-    int cream = Color.rgb(250, 245, 231);
-    int white = Color.WHITE;
-    int textDark = Color.rgb(55, 45, 38);
-    int orange = Color.rgb(194, 93, 31);
+    // DATRIDHA BRAND COLORS
+    final int GREEN = Color.rgb(23, 115, 58);
+    final int DARK_GREEN = Color.rgb(12, 76, 39);
+    final int GOLD = Color.rgb(212, 164, 55);
+    final int BROWN = Color.rgb(91, 58, 31);
+    final int DARK_BROWN = Color.rgb(55, 35, 18);
+    final int ORANGE = Color.rgb(204, 103, 35);
+    final int CREAM = Color.rgb(250, 246, 235);
+    final int LIGHT_GREEN = Color.rgb(232, 244, 232);
+    final int TEXT = Color.rgb(55, 50, 43);
+    final int WHITE = Color.WHITE;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,7 +39,7 @@ public class MainActivity extends Activity {
     }
 
     // =========================================================
-    // BASIC HELPERS
+    // BASIC UI HELPERS
     // =========================================================
 
     TextView text(String value, float size, int color, boolean bold) {
@@ -48,39 +49,52 @@ public class MainActivity extends Activity {
         t.setTextColor(color);
         t.setTypeface(bold ? Typeface.DEFAULT_BOLD : Typeface.DEFAULT);
         t.setGravity(Gravity.CENTER_VERTICAL);
-        t.setPadding(8, 8, 8, 8);
+        t.setPadding(6, 5, 6, 5);
         return t;
     }
 
-    GradientDrawable background(int color, float radius) {
+    GradientDrawable bg(int color, float radius) {
         GradientDrawable g = new GradientDrawable();
         g.setColor(color);
         g.setCornerRadius(radius);
         return g;
     }
 
-    GradientDrawable gradientBackground() {
+    GradientDrawable strokeBg(
+            int color,
+            int strokeColor,
+            int strokeWidth,
+            float radius
+    ) {
+        GradientDrawable g = new GradientDrawable();
+        g.setColor(color);
+        g.setCornerRadius(radius);
+        g.setStroke(strokeWidth, strokeColor);
+        return g;
+    }
+
+    GradientDrawable brandGradient() {
         GradientDrawable g = new GradientDrawable(
                 GradientDrawable.Orientation.TL_BR,
                 new int[]{
-                        Color.rgb(255, 248, 226),
-                        Color.rgb(239, 225, 184),
-                        Color.rgb(218, 192, 126)
+                        Color.rgb(255, 250, 236),
+                        Color.rgb(245, 231, 190),
+                        Color.rgb(226, 196, 119)
                 }
         );
         return g;
     }
 
-    Button button(String label, int color) {
+    Button button(String title, int color) {
         Button b = new Button(this);
-        b.setText(label);
-        b.setTextSize(15);
-        b.setTextColor(Color.WHITE);
+        b.setText(title);
+        b.setTextColor(WHITE);
+        b.setTextSize(14);
         b.setTypeface(Typeface.DEFAULT_BOLD);
         b.setAllCaps(false);
         b.setGravity(Gravity.CENTER);
-        b.setPadding(10, 4, 10, 4);
-        b.setBackground(background(color, 45));
+        b.setPadding(8, 2, 8, 2);
+        b.setBackground(bg(color, 50));
         return b;
     }
 
@@ -88,18 +102,21 @@ public class MainActivity extends Activity {
         EditText e = new EditText(this);
         e.setHint(hint);
         e.setTextSize(15);
-        e.setTextColor(textDark);
-        e.setHintTextColor(Color.rgb(130, 120, 105));
-        e.setSingleLine(false);
-        e.setPadding(18, 12, 18, 12);
-        e.setBackground(background(Color.WHITE, 28));
+        e.setTextColor(TEXT);
+        e.setHintTextColor(Color.rgb(135, 125, 110));
+        e.setPadding(18, 10, 18, 10);
+        e.setBackground(strokeBg(
+                WHITE,
+                Color.rgb(220, 210, 190),
+                1,
+                28
+        ));
         return e;
     }
 
     LinearLayout vertical() {
         LinearLayout l = new LinearLayout(this);
         l.setOrientation(LinearLayout.VERTICAL);
-        l.setPadding(18, 18, 18, 18);
         return l;
     }
 
@@ -110,11 +127,26 @@ public class MainActivity extends Activity {
         return l;
     }
 
-    void addSpace(LinearLayout parent, int height) {
+    void space(LinearLayout parent, int height) {
         Space s = new Space(this);
-        parent.addView(s, new LinearLayout.LayoutParams(
-                1, height
-        ));
+        parent.addView(
+                s,
+                new LinearLayout.LayoutParams(1, height)
+        );
+    }
+
+    LinearLayout card() {
+        LinearLayout c = vertical();
+        c.setPadding(18, 16, 18, 16);
+        c.setBackground(
+                strokeBg(
+                        Color.argb(245, 255, 252, 244),
+                        Color.rgb(231, 218, 189),
+                        1,
+                        30
+                )
+        );
+        return c;
     }
 
     void clearContent() {
@@ -122,139 +154,162 @@ public class MainActivity extends Activity {
     }
 
     // =========================================================
-    // MAIN SCREEN
+    // HOME
     // =========================================================
 
     void showHome() {
 
-        root = new LinearLayout(this);
-        root.setOrientation(LinearLayout.VERTICAL);
-        root.setBackground(gradientBackground());
+        root = vertical();
+        root.setBackground(CREAM);
 
         // TOP BAR
         LinearLayout top = horizontal();
-        top.setPadding(14, 14, 14, 8);
+        top.setPadding(14, 10, 14, 6);
+        top.setBackground(WHITE);
 
-        TextView logo = text("DATRIDHA", 25, brown, true);
-        logo.setGravity(Gravity.CENTER);
+        TextView miniLogo = text(
+                "🌴 DATRIDHA",
+                23,
+                DARK_GREEN,
+                true
+        );
 
-        top.addView(logo, new LinearLayout.LayoutParams(
-                0, 60, 1
-        ));
+        top.addView(
+                miniLogo,
+                new LinearLayout.LayoutParams(0, 55, 1)
+        );
 
-        Button lang = button(french ? "عربي" : "FR", darkGreen);
-        lang.setTextSize(13);
+        Button language = button(
+                french ? "عربي" : "FR",
+                GREEN
+        );
 
-        top.addView(lang, new LinearLayout.LayoutParams(
-                65, 48
-        ));
+        language.setTextSize(12);
 
-        lang.setOnClickListener(v -> {
+        language.setOnClickListener(v -> {
             french = !french;
             showHome();
         });
 
+        top.addView(
+                language,
+                new LinearLayout.LayoutParams(65, 46)
+        );
+
         root.addView(top);
 
-        // BRAND AREA
-        LinearLayout brand = vertical();
-        brand.setGravity(Gravity.CENTER);
-        brand.setPadding(20, 18, 20, 18);
-        brand.setBackground(background(Color.argb(245, 255, 251, 238), 38));
+        // BRAND HERO
+        LinearLayout hero = vertical();
+        hero.setGravity(Gravity.CENTER);
+        hero.setPadding(18, 18, 18, 18);
+        hero.setBackground(brandGradient());
 
-        TextView palm = text("🌴", 50, green, false);
+        TextView palm = text(
+                "🌴",
+                52,
+                GREEN,
+                false
+        );
         palm.setGravity(Gravity.CENTER);
-        brand.addView(palm);
+        hero.addView(palm);
 
-        TextView title = text(
+        TextView brand = text(
                 "DATRIDHA",
-                38,
-                darkBrown,
+                40,
+                DARK_BROWN,
                 true
         );
-        title.setGravity(Gravity.CENTER);
-        brand.addView(title);
+        brand.setGravity(Gravity.CENTER);
+        hero.addView(brand);
 
-        TextView subtitle = text(
+        TextView line = text(
                 french
                         ? "Deglet Nour de Bechni"
                         : "دقلة النور من بشني",
-                18,
-                green,
+                19,
+                GREEN,
                 true
         );
-        subtitle.setGravity(Gravity.CENTER);
-        brand.addView(subtitle);
+        line.setGravity(Gravity.CENTER);
+        hero.addView(line);
 
         TextView slogan = text(
                 french
                         ? "Achetez • Vendez • Échangez"
                         : "اشترِ • بِع • تعامل",
                 14,
-                brown,
-                false
+                BROWN,
+                true
         );
         slogan.setGravity(Gravity.CENTER);
-        brand.addView(slogan);
+        hero.addView(slogan);
 
-        root.addView(brand, new LinearLayout.LayoutParams(
-                -1, 205
-        ));
+        root.addView(
+                hero,
+                new LinearLayout.LayoutParams(-1, 215)
+        );
 
-        addSpace(root, 12);
-
-        // CONTENT
+        // SCROLL CONTENT
         ScrollView scroll = new ScrollView(this);
 
         content = vertical();
-        content.setPadding(18, 5, 18, 25);
+        content.setPadding(16, 16, 16, 20);
 
         scroll.addView(content);
-        root.addView(scroll, new LinearLayout.LayoutParams(
-                -1, 0, 1
-        ));
+
+        root.addView(
+                scroll,
+                new LinearLayout.LayoutParams(0, 0, 1)
+        );
 
         // BOTTOM NAVIGATION
         LinearLayout nav = horizontal();
-        nav.setPadding(8, 8, 8, 8);
-        nav.setBackground(background(Color.WHITE, 0));
+        nav.setPadding(6, 7, 6, 7);
+        nav.setBackground(WHITE);
 
         Button buy = button(
-                french ? "Acheter" : "شراء",
-                green
+                french ? "🛒\nAcheter" : "🛒\nشراء",
+                GREEN
         );
 
         Button sell = button(
-                french ? "Vendre" : "بيع",
-                orange
+                french ? "📦\nVendre" : "📦\nبيع",
+                ORANGE
         );
 
-        Button ordersBtn = button(
-                french ? "Commandes" : "الطلبات",
-                brown
+        Button ordersButton = button(
+                french ? "📋\nCommandes" : "📋\nالطلبات",
+                BROWN
         );
 
         Button contact = button(
-                french ? "Contact" : "تواصل",
-                darkGreen
+                french ? "☎\nContact" : "☎\nتواصل",
+                DARK_GREEN
         );
 
-        nav.addView(buy, new LinearLayout.LayoutParams(
-                0, 52, 1
-        ));
-        nav.addView(sell, new LinearLayout.LayoutParams(
-                0, 52, 1
-        ));
-        nav.addView(ordersBtn, new LinearLayout.LayoutParams(
-                0, 52, 1
-        ));
-        nav.addView(contact, new LinearLayout.LayoutParams(
-                0, 52, 1
-        ));
+        nav.addView(
+                buy,
+                new LinearLayout.LayoutParams(0, 58, 1)
+        );
+
+        nav.addView(
+                sell,
+                new LinearLayout.LayoutParams(0, 58, 1)
+        );
+
+        nav.addView(
+                ordersButton,
+                new LinearLayout.LayoutParams(0, 58, 1)
+        );
+
+        nav.addView(
+                contact,
+                new LinearLayout.LayoutParams(0, 58, 1)
+        );
 
         buy.setOnClickListener(v -> showBuy());
         sell.setOnClickListener(v -> showSell());
-        ordersBtn.setOnClickListener(v -> showOrders());
+        ordersButton.setOnClickListener(v -> showOrders());
         contact.setOnClickListener(v -> showContact());
 
         root.addView(nav);
@@ -276,214 +331,281 @@ public class MainActivity extends Activity {
                 french
                         ? "Bienvenue sur DATRIDHA"
                         : "مرحبًا بك في DATRIDHA",
-                23,
-                darkBrown,
+                24,
+                DARK_BROWN,
                 true
         );
 
         welcome.setGravity(Gravity.CENTER);
         content.addView(welcome);
 
-        addSpace(content, 8);
-
         TextView description = text(
                 french
-                        ? "La plateforme dédiée au commerce de gros de Deglet Nour de Bechni."
-                        : "منصة مخصصة لتجارة الجملة لدقلة النور من بشني.",
-                15,
-                textDark,
+                        ? "La plateforme de commerce de gros de Deglet Nour."
+                        : "منصة تجارة الجملة لدقلة النور.",
+                14,
+                TEXT,
                 false
         );
 
         description.setGravity(Gravity.CENTER);
         content.addView(description);
 
-        addSpace(content, 20);
+        space(content, 16);
 
-        // BUY CARD
+        // BUY
         LinearLayout buyCard = card();
 
         TextView buyTitle = text(
-                "🛒  " + (french ? "Acheter Deglet Nour" : "شراء دقلة النور"),
+                "🛒  " +
+                        (french
+                                ? "Acheter Deglet Nour"
+                                : "شراء دقلة النور"),
                 20,
-                green,
+                GREEN,
                 true
         );
 
         buyCard.addView(buyTitle);
 
-        TextView buyText = text(
+        buyCard.addView(text(
                 french
-                        ? "Découvrez les offres disponibles et contactez les vendeurs."
-                        : "اكتشف عروض البيع المتوفرة وتواصل مع البائع.",
+                        ? "Découvrez les offres disponibles."
+                        : "اكتشف عروض دقلة النور المتوفرة.",
                 14,
-                textDark,
+                TEXT,
                 false
-        );
-
-        buyCard.addView(buyText);
-
-        Button buyButton = button(
-                french ? "Voir les offres" : "مشاهدة العروض",
-                green
-        );
-
-        buyButton.setOnClickListener(v -> showBuy());
-        buyCard.addView(buyButton, new LinearLayout.LayoutParams(
-                -1, 50
         ));
+
+        space(buyCard, 8);
+
+        Button buy = button(
+                french ? "Voir les offres" : "مشاهدة العروض",
+                GREEN
+        );
+
+        buy.setOnClickListener(v -> showBuy());
+
+        buyCard.addView(
+                buy,
+                new LinearLayout.LayoutParams(-1, 50)
+        );
 
         content.addView(buyCard);
 
-        addSpace(content, 12);
+        space(content, 12);
 
-        // SELL CARD
+        // SELL
         LinearLayout sellCard = card();
 
         TextView sellTitle = text(
-                "📦  " + (french ? "Vendre Deglet Nour" : "بيع دقلة النور"),
+                "📦  " +
+                        (french
+                                ? "Vendre Deglet Nour"
+                                : "بيع دقلة النور"),
                 20,
-                orange,
+                ORANGE,
                 true
         );
 
         sellCard.addView(sellTitle);
 
-        TextView sellText = text(
+        sellCard.addView(text(
                 french
-                        ? "Publiez votre quantité, votre prix et vos photos."
-                        : "انشر الكمية والسعر وأرفق صور منتجك.",
+                        ? "Publiez votre quantité, prix et photos."
+                        : "انشر الكمية والسعر والصور.",
                 14,
-                textDark,
+                TEXT,
                 false
-        );
-
-        sellCard.addView(sellText);
-
-        Button sellButton = button(
-                french ? "Publier une offre" : "إضافة عرض بيع",
-                orange
-        );
-
-        sellButton.setOnClickListener(v -> showSell());
-        sellCard.addView(sellButton, new LinearLayout.LayoutParams(
-                -1, 50
         ));
+
+        space(sellCard, 8);
+
+        Button sell = button(
+                french ? "Publier une offre" : "إضافة عرض بيع",
+                ORANGE
+        );
+
+        sell.setOnClickListener(v -> showSell());
+
+        sellCard.addView(
+                sell,
+                new LinearLayout.LayoutParams(-1, 50)
+        );
 
         content.addView(sellCard);
 
-        addSpace(content, 12);
+        space(content, 12);
 
-        // TRUST CARD
-        LinearLayout trust = card();
+        // FEATURES
+        LinearLayout feature = card();
 
-        TextView trustTitle = text(
-                french ? "🌴 Notre objectif" : "🌴 هدف DATRIDHA",
+        TextView featureTitle = text(
+                french
+                        ? "Pourquoi DATRIDHA ?"
+                        : "لماذا DATRIDHA؟",
                 19,
-                brown,
+                BROWN,
                 true
         );
 
-        trust.addView(trustTitle);
+        feature.addView(featureTitle);
 
-        TextView trustText = text(
-                french
-                        ? "Faciliter le commerce de Deglet Nour entre producteurs, grossistes et acheteurs."
-                        : "تسهيل التجارة في دقلة النور بين المنتجين وتجار الجملة والمشترين.",
-                14,
-                textDark,
+        feature.addView(text(
+                "✓ " +
+                        (french
+                                ? "Commerce direct"
+                                : "تجارة مباشرة"),
+                15,
+                TEXT,
                 false
+        ));
+
+        feature.addView(text(
+                "✓ " +
+                        (french
+                                ? "Qualité Deglet Nour"
+                                : "جودة دقلة النور"),
+                15,
+                TEXT,
+                false
+        ));
+
+        feature.addView(text(
+                "✓ " +
+                        (french
+                                ? "Producteurs de Bechni"
+                                : "منتجو بشني"),
+                15,
+                TEXT,
+                false
+        ));
+
+        feature.addView(text(
+                "✓ " +
+                        (french
+                                ? "Contact rapide"
+                                : "تواصل سريع"),
+                15,
+                TEXT,
+                false
+        ));
+
+        content.addView(feature);
+
+        space(content, 15);
+
+        TextView footer = text(
+                french
+                        ? "🌴 DATRIDHA — Plus qu’une application, une opportunité."
+                        : "🌴 DATRIDHA — أكثر من تطبيق، فرصة تجارية.",
+                13,
+                GREEN,
+                true
         );
 
-        trust.addView(trustText);
-
-        content.addView(trust);
-    }
-
-    LinearLayout card() {
-        LinearLayout c = vertical();
-        c.setPadding(18, 16, 18, 16);
-        c.setBackground(background(
-                Color.argb(245, 255, 252, 244),
-                32
-        ));
-        return c;
+        footer.setGravity(Gravity.CENTER);
+        content.addView(footer);
     }
 
     // =========================================================
-    // BUY
+    // BUY PAGE
     // =========================================================
 
     void showBuy() {
 
         clearContent();
 
-        addBackButton();
+        addBack();
 
         TextView title = text(
-                french ? "Acheter Deglet Nour" : "شراء دقلة النور",
+                french
+                        ? "Offres d'achat"
+                        : "عروض الشراء",
                 26,
-                green,
+                GREEN,
                 true
         );
 
         title.setGravity(Gravity.CENTER);
         content.addView(title);
 
-        addSpace(content, 12);
+        space(content, 8);
 
-        TextView info = text(
+        content.addView(text(
                 french
-                        ? "Offres disponibles de Deglet Nour en gros."
-                        : "عروض دقلة النور المتوفرة بالجملة.",
-                15,
-                textDark,
+                        ? "Deglet Nour disponible en gros."
+                        : "دقلة النور المتوفرة بالجملة.",
+                14,
+                TEXT,
                 false
+        ));
+
+        space(content, 14);
+
+        addOffer(
+                "🌴 Deglet Nour — Bechni",
+                french
+                        ? "Origine : Bechni"
+                        : "المصدر: بشني",
+                french
+                        ? "Quantité : selon demande"
+                        : "الكمية: حسب الطلب"
         );
 
-        content.addView(info);
+        space(content, 10);
 
-        addSpace(content, 15);
+        addOffer(
+                "🌴 Deglet Nour Premium",
+                french
+                        ? "Qualité supérieure"
+                        : "جودة ممتازة",
+                french
+                        ? "Prix : à négocier"
+                        : "السعر: قابل للتفاوض"
+        );
+    }
 
-        // SAMPLE OFFER
+    void addOffer(
+            String title,
+            String line1,
+            String line2
+    ) {
+
         LinearLayout offer = card();
 
-        TextView offerTitle = text(
-                "🌴 Déglet Nour — Bechni",
+        offer.addView(text(
+                title,
                 19,
-                brown,
+                BROWN,
                 true
+        ));
+
+        offer.addView(text(
+                line1,
+                14,
+                TEXT,
+                false
+        ));
+
+        offer.addView(text(
+                line2,
+                14,
+                TEXT,
+                false
+        ));
+
+        space(offer, 8);
+
+        Button details = button(
+                french
+                        ? "Demander cette offre"
+                        : "طلب هذا العرض",
+                GREEN
         );
 
-        offer.addView(offerTitle);
+        details.setOnClickListener(v -> {
 
-        offer.addView(text(
-                french ? "Origine : Bechni" : "المصدر: بشني",
-                14,
-                textDark,
-                false
-        ));
-
-        offer.addView(text(
-                french ? "Quantité : Disponible sur demande" : "الكمية: متوفرة حسب الطلب",
-                14,
-                textDark,
-                false
-        ));
-
-        offer.addView(text(
-                french ? "Prix : À négocier" : "السعر: قابل للتفاوض",
-                14,
-                textDark,
-                false
-        ));
-
-        Button order = button(
-                french ? "Demander cette offre" : "طلب هذا العرض",
-                green
-        );
-
-        order.setOnClickListener(v -> {
             orders.add(
                     french
                             ? "Demande Deglet Nour"
@@ -501,164 +623,150 @@ public class MainActivity extends Activity {
             showOrders();
         });
 
-        offer.addView(order, new LinearLayout.LayoutParams(
-                -1, 52
-        ));
+        offer.addView(
+                details,
+                new LinearLayout.LayoutParams(-1, 50)
+        );
 
         content.addView(offer);
-
-        addSpace(content, 12);
-
-        TextView contactText = text(
-                french
-                        ? "Pour une grande quantité, contactez-nous directement."
-                        : "للكميات الكبيرة، يمكنك التواصل معنا مباشرة.",
-                14,
-                brown,
-                true
-        );
-
-        contactText.setGravity(Gravity.CENTER);
-        content.addView(contactText);
-
-        Button contact = button(
-                french ? "Contacter DATRIDHA" : "تواصل مع DATRIDHA",
-                darkGreen
-        );
-
-        contact.setOnClickListener(v -> showContact());
-
-        content.addView(contact, new LinearLayout.LayoutParams(
-                -1, 52
-        ));
     }
 
     // =========================================================
-    // SELL
+    // SELL PAGE
     // =========================================================
 
     void showSell() {
 
         clearContent();
 
-        addBackButton();
+        addBack();
 
         TextView title = text(
-                french ? "Vendre Deglet Nour" : "بيع دقلة النور",
+                french
+                        ? "Publier une offre"
+                        : "إضافة عرض بيع",
                 26,
-                orange,
+                ORANGE,
                 true
         );
 
         title.setGravity(Gravity.CENTER);
         content.addView(title);
 
-        addSpace(content, 10);
+        space(content, 10);
 
         content.addView(text(
                 french
-                        ? "Ajoutez les informations de votre offre."
-                        : "أدخل معلومات عرض البيع الخاص بك.",
-                15,
-                textDark,
+                        ? "Présentez votre Deglet Nour aux acheteurs."
+                        : "اعرض دقلة النور الخاصة بك للمشترين.",
+                14,
+                TEXT,
                 false
         ));
 
-        addSpace(content, 12);
+        space(content, 14);
 
-        EditText name = input(
-                french ? "Nom du vendeur" : "اسم البائع"
+        EditText seller = input(
+                french
+                        ? "Nom du vendeur *"
+                        : "اسم البائع *"
         );
 
-        content.addView(name, new LinearLayout.LayoutParams(
-                -1, 60
-        ));
+        content.addView(
+                seller,
+                new LinearLayout.LayoutParams(-1, 60)
+        );
 
-        addSpace(content, 8);
+        space(content, 8);
 
         EditText quantity = input(
-                french ? "Quantité en kg / tonnes" : "الكمية بالكغ / الطن"
+                french
+                        ? "Quantité (kg / tonnes) *"
+                        : "الكمية (كغ / طن) *"
         );
 
-        content.addView(quantity, new LinearLayout.LayoutParams(
-                -1, 60
-        ));
+        content.addView(
+                quantity,
+                new LinearLayout.LayoutParams(-1, 60)
+        );
 
-        addSpace(content, 8);
+        space(content, 8);
 
         EditText price = input(
-                french ? "Prix proposé" : "السعر المقترح"
+                french
+                        ? "Prix proposé"
+                        : "السعر المقترح"
         );
 
-        content.addView(price, new LinearLayout.LayoutParams(
-                -1, 60
-        ));
+        content.addView(
+                price,
+                new LinearLayout.LayoutParams(-1, 60)
+        );
 
-        addSpace(content, 8);
+        space(content, 8);
 
         EditText phone = input(
-                french ? "Numéro de téléphone" : "رقم الهاتف"
-        );
-
-        content.addView(phone, new LinearLayout.LayoutParams(
-                -1, 60
-        ));
-
-        addSpace(content, 8);
-
-        EditText details = input(
                 french
-                        ? "Description / qualité / conditionnement"
-                        : "الوصف / الجودة / طريقة التعبئة"
+                        ? "Téléphone *"
+                        : "رقم الهاتف *"
         );
 
-        details.setMinHeight(100);
-        content.addView(details, new LinearLayout.LayoutParams(
-                -1, 110
-        ));
+        content.addView(
+                phone,
+                new LinearLayout.LayoutParams(-1, 60)
+        );
 
-        addSpace(content, 12);
+        space(content, 8);
 
-        TextView photoInfo = text(
+        EditText description = input(
                 french
-                        ? "📷 Vous pouvez ajouter des photos de votre produit."
-                        : "📷 يمكنك إضافة صور لمنتجك.",
-                14,
-                brown,
-                true
+                        ? "Qualité / emballage / détails"
+                        : "الجودة / التعبئة / التفاصيل"
         );
 
-        content.addView(photoInfo);
+        description.setMinHeight(110);
 
-        Button photo = button(
-                french ? "Ajouter des photos" : "إضافة صور",
-                brown
+        content.addView(
+                description,
+                new LinearLayout.LayoutParams(-1, 110)
         );
 
-        photo.setOnClickListener(v -> chooseImages());
+        space(content, 12);
 
-        content.addView(photo, new LinearLayout.LayoutParams(
-                -1, 52
-        ));
+        Button photos = button(
+                french
+                        ? "📷 Ajouter des photos"
+                        : "📷 إضافة صور",
+                BROWN
+        );
 
-        addSpace(content, 15);
+        photos.setOnClickListener(v -> chooseImages());
+
+        content.addView(
+                photos,
+                new LinearLayout.LayoutParams(-1, 52)
+        );
+
+        space(content, 14);
 
         Button publish = button(
-                french ? "Publier l'offre" : "نشر العرض",
-                orange
+                french
+                        ? "Publier l'offre"
+                        : "نشر العرض",
+                ORANGE
         );
 
         publish.setOnClickListener(v -> {
 
-            if (name.getText().toString().trim().isEmpty()
+            if (seller.getText().toString().trim().isEmpty()
                     || quantity.getText().toString().trim().isEmpty()
                     || phone.getText().toString().trim().isEmpty()) {
 
                 Toast.makeText(
                         this,
                         french
-                                ? "Veuillez remplir les champs obligatoires."
-                                : "يرجى ملء الخانات الأساسية.",
+                                ? "Veuillez remplir les champs *."
+                                : "يرجى ملء الخانات التي عليها *.",
                         Toast.LENGTH_LONG
                 ).show();
 
@@ -668,35 +776,51 @@ public class MainActivity extends Activity {
             orders.add(
                     french
                             ? "Offre de vente publiée"
-                            : "تم نشر عرض بيع"
+                            : "عرض بيع منشور"
             );
 
             Toast.makeText(
                     this,
                     french
-                            ? "Votre offre a été enregistrée."
-                            : "تم تسجيل عرضك بنجاح.",
+                            ? "Offre enregistrée avec succès."
+                            : "تم تسجيل العرض بنجاح.",
                     Toast.LENGTH_LONG
             ).show();
 
             showOrders();
         });
 
-        content.addView(publish, new LinearLayout.LayoutParams(
-                -1, 58
-        ));
+        content.addView(
+                publish,
+                new LinearLayout.LayoutParams(-1, 58)
+        );
     }
+
+    // =========================================================
+    // PHOTOS
+    // =========================================================
 
     void chooseImages() {
 
-        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        Intent intent = new Intent(
+                Intent.ACTION_OPEN_DOCUMENT
+        );
+
         intent.setType("image/*");
-        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-        intent.addCategory(Intent.CATEGORY_OPENABLE);
+
+        intent.putExtra(
+                Intent.EXTRA_ALLOW_MULTIPLE,
+                true
+        );
+
+        intent.addCategory(
+                Intent.CATEGORY_OPENABLE
+        );
 
         try {
             startActivityForResult(intent, 500);
         } catch (Exception e) {
+
             Toast.makeText(
                     this,
                     french
@@ -715,28 +839,30 @@ public class MainActivity extends Activity {
 
         clearContent();
 
-        addBackButton();
+        addBack();
 
         TextView title = text(
-                french ? "Mes commandes" : "الطلبات",
+                french
+                        ? "Mes commandes"
+                        : "الطلبات",
                 26,
-                brown,
+                BROWN,
                 true
         );
 
         title.setGravity(Gravity.CENTER);
         content.addView(title);
 
-        addSpace(content, 15);
+        space(content, 14);
 
-        if (orders.size() == 0) {
+        if (orders.isEmpty()) {
 
             LinearLayout empty = card();
 
             TextView icon = text(
                     "📋",
-                    45,
-                    brown,
+                    50,
+                    BROWN,
                     false
             );
 
@@ -748,25 +874,26 @@ public class MainActivity extends Activity {
                             ? "Aucune commande pour le moment."
                             : "لا توجد طلبات حاليًا.",
                     17,
-                    textDark,
+                    TEXT,
                     true
             );
 
             message.setGravity(Gravity.CENTER);
+
             empty.addView(message);
 
             content.addView(empty);
 
         } else {
 
-            for (int i = 0; i < orders.size(); i++) {
+            for (String order : orders) {
 
                 LinearLayout item = card();
 
                 item.addView(text(
-                        "✓  " + orders.get(i),
+                        "✓  " + order,
                         17,
-                        green,
+                        GREEN,
                         true
                 ));
 
@@ -775,28 +902,31 @@ public class MainActivity extends Activity {
                                 ? "Statut : enregistré"
                                 : "الحالة: مسجل",
                         14,
-                        textDark,
+                        TEXT,
                         false
                 ));
 
                 content.addView(item);
 
-                addSpace(content, 8);
+                space(content, 8);
             }
         }
 
-        addSpace(content, 15);
+        space(content, 14);
 
-        Button buy = button(
-                french ? "Nouvel achat" : "طلب شراء جديد",
-                green
+        Button newBuy = button(
+                french
+                        ? "Nouvel achat"
+                        : "طلب شراء جديد",
+                GREEN
         );
 
-        buy.setOnClickListener(v -> showBuy());
+        newBuy.setOnClickListener(v -> showBuy());
 
-        content.addView(buy, new LinearLayout.LayoutParams(
-                -1, 52
-        ));
+        content.addView(
+                newBuy,
+                new LinearLayout.LayoutParams(-1, 52)
+        );
     }
 
     // =========================================================
@@ -807,97 +937,116 @@ public class MainActivity extends Activity {
 
         clearContent();
 
-        addBackButton();
+        addBack();
 
         TextView title = text(
-                french ? "Contactez-nous" : "تواصل معنا",
+                french
+                        ? "Contactez-nous"
+                        : "تواصل معنا",
                 27,
-                darkGreen,
+                DARK_GREEN,
                 true
         );
 
         title.setGravity(Gravity.CENTER);
+
         content.addView(title);
 
-        addSpace(content, 15);
+        space(content, 14);
 
         LinearLayout contactCard = card();
 
         TextView palm = text(
                 "🌴",
-                45,
-                green,
+                55,
+                GREEN,
                 false
         );
 
         palm.setGravity(Gravity.CENTER);
+
         contactCard.addView(palm);
 
         TextView name = text(
                 "DATRIDHA",
-                28,
-                brown,
+                30,
+                BROWN,
                 true
         );
 
         name.setGravity(Gravity.CENTER);
+
         contactCard.addView(name);
 
-        addSpace(contactCard, 12);
+        space(contactCard, 8);
 
         TextView phone = text(
                 "+216 51 022 448",
                 19,
-                darkGreen,
+                DARK_GREEN,
                 true
         );
 
         phone.setGravity(Gravity.CENTER);
+
         contactCard.addView(phone);
 
         TextView email = text(
                 "ridhatouil1992@gmail.com",
-                16,
-                brown,
+                15,
+                BROWN,
                 false
         );
 
         email.setGravity(Gravity.CENTER);
+
         contactCard.addView(email);
 
         content.addView(contactCard);
 
-        addSpace(content, 15);
+        space(content, 14);
 
         Button call = button(
-                french ? "📞 Appeler" : "📞 اتصال",
-                green
+                french
+                        ? "📞 Appeler"
+                        : "📞 اتصال",
+                GREEN
         );
 
         call.setOnClickListener(v -> {
+
             Intent intent = new Intent(
                     Intent.ACTION_DIAL,
                     Uri.parse("tel:+21651022448")
             );
+
             startActivity(intent);
         });
 
-        content.addView(call, new LinearLayout.LayoutParams(
-                -1, 54
-        ));
+        content.addView(
+                call,
+                new LinearLayout.LayoutParams(-1, 54)
+        );
 
-        addSpace(content, 8);
+        space(content, 8);
 
         Button mail = button(
-                french ? "✉ Envoyer un email" : "✉ إرسال بريد إلكتروني",
-                brown
+                french
+                        ? "✉ Envoyer un email"
+                        : "✉ إرسال بريد إلكتروني",
+                BROWN
         );
 
         mail.setOnClickListener(v -> {
 
-            Intent intent = new Intent(Intent.ACTION_SENDTO);
+            Intent intent = new Intent(
+                    Intent.ACTION_SENDTO
+            );
+
             intent.setData(
-                    Uri.parse("mailto:ridhatouil1992@gmail.com")
+                    Uri.parse(
+                            "mailto:ridhatouil1992@gmail.com"
+                    )
             );
 
             intent.putExtra(
@@ -908,73 +1057,45 @@ public class MainActivity extends Activity {
             try {
                 startActivity(intent);
             } catch (Exception e) {
+
                 Toast.makeText(
                         this,
                         french
-                                ? "Aucune application email disponible."
+                                ? "Aucune application email."
                                 : "لا يوجد تطبيق بريد إلكتروني.",
                         Toast.LENGTH_SHORT
                 ).show();
             }
         });
 
-        content.addView(mail, new LinearLayout.LayoutParams(
-                -1, 54
-        ));
-
-        addSpace(content, 8);
-
-        Button settings = button(
-                french ? "Paramètres de l'application" : "إعدادات التطبيق",
-                darkGreen
+        content.addView(
+                mail,
+                new LinearLayout.LayoutParams(-1, 54)
         );
-
-        settings.setOnClickListener(v -> {
-
-            try {
-                Intent intent = new Intent(
-                        Settings.ACTION_APPLICATION_DETAILS_SETTINGS
-                );
-
-                intent.setData(
-                        Uri.parse(
-                                "package:" + getPackageName()
-                        )
-                );
-
-                startActivity(intent);
-
-            } catch (Exception e) {
-                Toast.makeText(
-                        this,
-                        "DATRIDHA",
-                        Toast.LENGTH_SHORT
-                ).show();
-            }
-        });
-
-        content.addView(settings, new LinearLayout.LayoutParams(
-                -1, 54
-        ));
     }
 
     // =========================================================
-    // BACK BUTTON
+    // BACK
     // =========================================================
 
-    void addBackButton() {
+    void addBack() {
 
         Button back = button(
-                french ? "← Accueil" : "← الرئيسية",
-                darkBrown
+                french
+                        ? "← Accueil"
+                        : "← الرئيسية",
+                DARK_BROWN
         );
 
-        back.setOnClickListener(v -> showHome());
+        back.setOnClickListener(
+                v -> showHome()
+        );
 
-        content.addView(back, new LinearLayout.LayoutParams(
-                -1, 48
-        ));
+        content.addView(
+                back,
+                new LinearLayout.LayoutParams(-1, 48)
+        );
 
-        addSpace(content, 10);
+        space(content, 10);
     }
 }
