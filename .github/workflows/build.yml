@@ -16,20 +16,18 @@ jobs:
           rm -rf project
           unzip -q DATRIDHA_project_COLORED_FUNCTIONAL_FINAL.zip -d project
 
-      - name: Restore custom MainActivity
+      - name: Restore MainActivity
         run: |
           mkdir -p project/app/src/main/java/com/datridha/app
+          cp project/app/src/main/java/com/datridha/app/MainActivity.java /tmp/old_MainActivity.java
           git show HEAD:project/app/src/main/java/com/datridha/app/MainActivity.java > project/app/src/main/java/com/datridha/app/MainActivity.java
 
-      - name: Fix MainActivity
+      - name: Verify MainActivity
         run: |
-          sed -i 's/public class MainActivity {/public class MainActivity extends Activity {/' project/app/src/main/java/com/datridha/app/MainActivity.java
-
-      - name: Check MainActivity
-        run: |
-          echo "===== MainActivity ====="
-          head -30 project/app/src/main/java/com/datridha/app/MainActivity.java
-          echo "===== End check ====="
+          echo "===== MAIN ACTIVITY ====="
+          grep -n "class MainActivity" project/app/src/main/java/com/datridha/app/MainActivity.java
+          grep -n "DATRIDHA" project/app/src/main/java/com/datridha/app/MainActivity.java | head -10
+          echo "===== END ====="
 
       - name: Set up Java 17
         uses: actions/setup-java@v5
@@ -42,20 +40,17 @@ jobs:
         with:
           gradle-version: '8.2'
 
-      - name: Find Gradle project
-        run: |
-          echo "Searching for Gradle project..."
-          find project \( -name settings.gradle -o -name settings.gradle.kts \) -print
-
       - name: Build APK
         run: |
-          PROJECT_DIR=$(dirname "$(find project \( -name settings.gradle -o -name settings.gradle.kts \) -print -quit)")
-          echo "Gradle project found at: $PROJECT_DIR"
-          gradle -p "$PROJECT_DIR" assembleDebug
+          gradle -p project assembleDebug
+
+      - name: Show APK information
+        run: |
+          ls -lh project/app/build/outputs/apk/debug/app-debug.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: DATRIDHA-APK-NEW
-          path: project/**/app/build/outputs/apk/debug/app-debug.apk
+          name: DATRIDHA-FINAL
+          path: project/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
