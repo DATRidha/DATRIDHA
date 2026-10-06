@@ -1,0 +1,22 @@
+name: Prepare DATRIDHA Project
+
+on:
+  workflow_dispatch:
+
+jobs:
+  prepare:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Extract project ZIP
+        run: |
+          rm -rf project
+          unzip -q DATRIDHA_project_COLORED_FUNCTIONAL_FINAL.zip -d project
+
+      - name: Show extracted files
+        run: |
+          echo "Project extracted successfully:"
+          find project -maxdepth 3 -type f | head -100
