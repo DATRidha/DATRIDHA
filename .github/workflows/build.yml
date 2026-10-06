@@ -16,26 +16,18 @@ jobs:
           rm -rf project
           unzip -q DATRIDHA_project_COLORED_FUNCTIONAL_FINAL.zip -d project
 
-      - name: Restore MainActivity
+      - name: Inspect MainActivity
         run: |
+          echo "========================================"
+          echo "MAIN ACTIVITY USED FOR BUILD"
+          echo "========================================"
+
           TARGET=$(find project -type f -name "MainActivity.java" | head -1)
 
           if [ -z "$TARGET" ]; then
             echo "ERROR: MainActivity.java not found"
             exit 1
           fi
-
-          echo "TARGET=$TARGET"
-
-          git show HEAD:project/app/src/main/java/com/datridha/app/MainActivity.java > "$TARGET"
-
-      - name: Inspect MainActivity
-        run: |
-          TARGET=$(find project -type f -name "MainActivity.java" | head -1)
-
-          echo "========================================"
-          echo "MAIN ACTIVITY USED FOR BUILD"
-          echo "========================================"
 
           echo "FILE:"
           echo "$TARGET"
@@ -47,6 +39,10 @@ jobs:
           echo ""
           echo "FIRST 40 LINES:"
           head -40 "$TARGET"
+
+          echo ""
+          echo "VIEWGROUP IMPORT:"
+          grep -n "import android.view.ViewGroup;" "$TARGET" || true
 
           echo ""
           echo "DATRIDHA REFERENCES:"
