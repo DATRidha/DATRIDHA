@@ -39,28 +39,40 @@ public class MainActivity extends Activity {
         LinearLayout root = baseLayout();
 
         ImageView logo = new ImageView(this);
-        logo.setImageResource(R.drawable.logo_datridha);
+        logo.setImageResource(R.drawable.app_icon);
         logo.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
 
-        root.addView(logo, new LinearLayout.LayoutParams(
-                -1, dp(180)
-        ));
+        root.addView(
+                logo,
+                new LinearLayout.LayoutParams(
+                        -1,
+                        dp(180)
+                )
+        );
 
         TextView title = title("DATRIDHA");
         root.addView(title);
 
         TextView subtitle = text(
-                "دقلة النور من بشني\nتجارة مباشرة من المنتج إلى المشتري",
+                language.equals("fr")
+                        ? "Deglet Nour de Bechni\nCommerce direct du producteur à l'acheteur"
+                        : language.equals("en")
+                        ? "Deglet Nour dates from Bechni\nDirect trade from producer to buyer"
+                        : "دقلة النور من بشني\nتجارة مباشرة من المنتج إلى المشتري",
                 18
         );
+
         subtitle.setGravity(Gravity.CENTER);
         root.addView(subtitle);
 
         space(root, 25);
 
         Button start = button(
-                language.equals("fr") ? "Commencer" :
-                language.equals("en") ? "Start" : "ابدأ الآن"
+                language.equals("fr")
+                        ? "Commencer"
+                        : language.equals("en")
+                        ? "Start"
+                        : "ابدأ الآن"
         );
 
         start.setOnClickListener(v -> showHome());
@@ -69,11 +81,14 @@ public class MainActivity extends Activity {
         space(root, 15);
 
         TextView languageTitle = text(
-                language.equals("fr") ? "Choisir la langue" :
-                language.equals("en") ? "Choose language" :
-                "اختر اللغة",
+                language.equals("fr")
+                        ? "Choisir la langue"
+                        : language.equals("en")
+                        ? "Choose language"
+                        : "اختر اللغة",
                 15
         );
+
         languageTitle.setGravity(Gravity.CENTER);
         root.addView(languageTitle);
 
@@ -105,8 +120,6 @@ public class MainActivity extends Activity {
         languages.addView(en);
 
         root.addView(languages);
-
-        setContentView(root);
     }
 
     // =====================================================
@@ -121,13 +134,13 @@ public class MainActivity extends Activity {
 
         addHeader(root);
 
-        TextView welcome = title(
-                language.equals("fr") ? "Bienvenue sur DATRIDHA" :
-                language.equals("en") ? "Welcome to DATRIDHA" :
-                "مرحباً بك في DATRIDHA"
-        );
-
-        root.addView(welcome);
+        root.addView(title(
+                language.equals("fr")
+                        ? "Bienvenue sur DATRIDHA"
+                        : language.equals("en")
+                        ? "Welcome to DATRIDHA"
+                        : "مرحباً بك في DATRIDHA"
+        ));
 
         TextView description = text(
                 language.equals("fr")
@@ -144,51 +157,59 @@ public class MainActivity extends Activity {
         space(root, 20);
 
         Button buy = button(
-                language.equals("fr") ? "Acheter des dattes" :
-                language.equals("en") ? "Buy dates" :
-                "شراء التمور"
+                language.equals("fr")
+                        ? "Acheter des dattes"
+                        : language.equals("en")
+                        ? "Buy dates"
+                        : "شراء التمور"
         );
 
         buy.setOnClickListener(v -> showBuy());
         root.addView(buy);
 
         Button sell = button(
-                language.equals("fr") ? "Vendre mes dattes" :
-                language.equals("en") ? "Sell my dates" :
-                "بيع التمور"
+                language.equals("fr")
+                        ? "Vendre mes dattes"
+                        : language.equals("en")
+                        ? "Sell my dates"
+                        : "بيع التمور"
         );
 
         sell.setOnClickListener(v -> showSell());
         root.addView(sell);
 
         Button orders = button(
-                language.equals("fr") ? "Mes commandes" :
-                language.equals("en") ? "My orders" :
-                "طلباتي"
+                language.equals("fr")
+                        ? "Mes commandes"
+                        : language.equals("en")
+                        ? "My orders"
+                        : "طلباتي"
         );
 
         orders.setOnClickListener(v -> showOrders());
         root.addView(orders);
 
         Button contact = button(
-                language.equals("fr") ? "Contact" :
-                language.equals("en") ? "Contact" :
-                "الاتصال بنا"
+                language.equals("fr")
+                        ? "Contact"
+                        : language.equals("en")
+                        ? "Contact"
+                        : "الاتصال بنا"
         );
 
         contact.setOnClickListener(v -> showContact());
         root.addView(contact);
 
         Button settings = button(
-                language.equals("fr") ? "Paramètres" :
-                language.equals("en") ? "Settings" :
-                "الإعدادات"
+                language.equals("fr")
+                        ? "Paramètres"
+                        : language.equals("en")
+                        ? "Settings"
+                        : "الإعدادات"
         );
 
         settings.setOnClickListener(v -> showSettings());
         root.addView(settings);
-
-        setContentView(root);
     }
 
     // =====================================================
@@ -202,39 +223,39 @@ public class MainActivity extends Activity {
         LinearLayout root = baseLayout();
 
         addBackButton(root);
-
         addHeader(root);
 
-        TextView heading = title(
-                language.equals("fr") ? "Acheter des dattes" :
-                language.equals("en") ? "Buy dates" :
-                "شراء دقلة النور"
-        );
+        root.addView(title(
+                language.equals("fr")
+                        ? "Acheter des dattes"
+                        : language.equals("en")
+                        ? "Buy dates"
+                        : "شراء دقلة النور"
+        ));
 
-        root.addView(heading);
-
-        addProduct(root,
+        addProduct(
+                root,
                 "Deglet Nour – Qualité Premium",
                 "دقلة نور فاخرة من بشني",
                 "25 kg",
                 "Prix sur demande"
         );
 
-        addProduct(root,
+        addProduct(
+                root,
                 "Deglet Nour – Qualité Standard",
                 "دقلة نور أصلية من المنتج",
                 "10 kg",
                 "Prix sur demande"
         );
 
-        addProduct(root,
+        addProduct(
+                root,
                 "Deglet Nour – Gros volume",
                 "طلبات الجملة والكميات الكبيرة",
                 "50 kg +",
                 "Prix sur demande"
         );
-
-        setContentView(root);
     }
 
     private void addProduct(
@@ -246,12 +267,24 @@ public class MainActivity extends Activity {
     ) {
 
         LinearLayout card = new LinearLayout(this);
+
         card.setOrientation(LinearLayout.VERTICAL);
-        card.setPadding(dp(18), dp(15), dp(18), dp(15));
+        card.setPadding(
+                dp(18),
+                dp(15),
+                dp(18),
+                dp(15)
+        );
+
         card.setGravity(Gravity.CENTER);
 
         TextView n = text(name, 19);
-        n.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+
+        n.setTypeface(
+                Typeface.DEFAULT,
+                Typeface.BOLD
+        );
+
         n.setTextColor(GREEN);
         n.setGravity(Gravity.CENTER);
 
@@ -265,16 +298,21 @@ public class MainActivity extends Activity {
                 quantity + "   •   " + price,
                 15
         );
+
         q.setGravity(Gravity.CENTER);
         card.addView(q);
 
         Button details = button(
-                language.equals("fr") ? "Voir l'offre" :
-                language.equals("en") ? "View offer" :
-                "عرض التفاصيل"
+                language.equals("fr")
+                        ? "Voir l'offre"
+                        : language.equals("en")
+                        ? "View offer"
+                        : "عرض التفاصيل"
         );
 
-        details.setOnClickListener(v -> showOfferDetails());
+        details.setOnClickListener(
+                v -> showOfferDetails()
+        );
 
         card.addView(details);
 
@@ -305,16 +343,15 @@ public class MainActivity extends Activity {
         LinearLayout root = baseLayout();
 
         addBackButton(root);
-
         addHeader(root);
 
-        TextView heading = title(
-                language.equals("fr") ? "Détails de l'offre" :
-                language.equals("en") ? "Offer details" :
-                "تفاصيل العرض"
-        );
-
-        root.addView(heading);
+        root.addView(title(
+                language.equals("fr")
+                        ? "Détails de l'offre"
+                        : language.equals("en")
+                        ? "Offer details"
+                        : "تفاصيل العرض"
+        ));
 
         TextView product = text(
                 "Déglet Nour – Bechni\n\n" +
@@ -331,18 +368,22 @@ public class MainActivity extends Activity {
         space(root, 20);
 
         Button call = button(
-                language.equals("fr") ? "Appeler le vendeur" :
-                language.equals("en") ? "Call seller" :
-                "الاتصال بالبائع"
+                language.equals("fr")
+                        ? "Appeler le vendeur"
+                        : language.equals("en")
+                        ? "Call seller"
+                        : "الاتصال بالبائع"
         );
 
         call.setOnClickListener(v -> callPhone());
         root.addView(call);
 
         Button order = button(
-                language.equals("fr") ? "Demander cette offre" :
-                language.equals("en") ? "Request this offer" :
-                "طلب هذا العرض"
+                language.equals("fr")
+                        ? "Demander cette offre"
+                        : language.equals("en")
+                        ? "Request this offer"
+                        : "طلب هذا العرض"
         );
 
         order.setOnClickListener(v ->
@@ -358,8 +399,6 @@ public class MainActivity extends Activity {
         );
 
         root.addView(order);
-
-        setContentView(root);
     }
 
     // =====================================================
@@ -373,13 +412,14 @@ public class MainActivity extends Activity {
         LinearLayout root = baseLayout();
 
         addBackButton(root);
-
         addHeader(root);
 
         root.addView(title(
-                language.equals("fr") ? "Vendre mes dattes" :
-                language.equals("en") ? "Sell my dates" :
-                "بيع التمور"
+                language.equals("fr")
+                        ? "Vendre mes dattes"
+                        : language.equals("en")
+                        ? "Sell my dates"
+                        : "بيع التمور"
         ));
 
         root.addView(text(
@@ -433,7 +473,15 @@ public class MainActivity extends Activity {
         publish.setOnClickListener(v -> {
 
             if (quantity.getText().toString().trim().isEmpty()) {
-                quantity.setError("أدخل الكمية");
+
+                quantity.setError(
+                        language.equals("fr")
+                                ? "Entrez la quantité"
+                                : language.equals("en")
+                                ? "Enter quantity"
+                                : "أدخل الكمية"
+                );
+
                 return;
             }
 
@@ -449,8 +497,6 @@ public class MainActivity extends Activity {
         });
 
         root.addView(publish);
-
-        setContentView(root);
     }
 
     // =====================================================
@@ -464,7 +510,6 @@ public class MainActivity extends Activity {
         LinearLayout root = baseLayout();
 
         addBackButton(root);
-
         addHeader(root);
 
         root.addView(title(
@@ -487,8 +532,6 @@ public class MainActivity extends Activity {
         empty.setGravity(Gravity.CENTER);
 
         root.addView(empty);
-
-        setContentView(root);
     }
 
     // =====================================================
@@ -502,7 +545,6 @@ public class MainActivity extends Activity {
         LinearLayout root = baseLayout();
 
         addBackButton(root);
-
         addHeader(root);
 
         root.addView(title(
@@ -542,8 +584,6 @@ public class MainActivity extends Activity {
 
         email.setOnClickListener(v -> sendEmail());
         root.addView(email);
-
-        setContentView(root);
     }
 
     // =====================================================
@@ -557,7 +597,6 @@ public class MainActivity extends Activity {
         LinearLayout root = baseLayout();
 
         addBackButton(root);
-
         addHeader(root);
 
         root.addView(title(
@@ -576,7 +615,9 @@ public class MainActivity extends Activity {
                         : "تغيير اللغة"
         );
 
-        languageButton.setOnClickListener(v -> changeLanguage());
+        languageButton.setOnClickListener(
+                v -> changeLanguage()
+        );
 
         root.addView(languageButton);
 
@@ -591,7 +632,11 @@ public class MainActivity extends Activity {
         notifications.setOnClickListener(v ->
                 Toast.makeText(
                         this,
-                        "Notifications",
+                        language.equals("fr")
+                                ? "Notifications activées"
+                                : language.equals("en")
+                                ? "Notifications enabled"
+                                : "الإشعارات مفعلة",
                         Toast.LENGTH_SHORT
                 ).show()
         );
@@ -627,8 +672,6 @@ public class MainActivity extends Activity {
         help.setOnClickListener(v -> showContact());
 
         root.addView(help);
-
-        setContentView(root);
     }
 
     // =====================================================
@@ -656,8 +699,10 @@ public class MainActivity extends Activity {
 
         ImageView logo = new ImageView(this);
 
-        logo.setImageResource(R.drawable.logo_datridha);
-        logo.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+        logo.setImageResource(R.drawable.app_icon);
+        logo.setScaleType(
+                ImageView.ScaleType.CENTER_INSIDE
+        );
 
         root.addView(
                 logo,
@@ -682,7 +727,7 @@ public class MainActivity extends Activity {
     }
 
     // =====================================================
-    // BACK
+    // BACK BUTTON
     // =====================================================
 
     private void addBackButton(LinearLayout root) {
@@ -698,8 +743,11 @@ public class MainActivity extends Activity {
         back.setOnClickListener(v -> {
 
             if ("details".equals(currentPage)) {
+
                 showBuy();
+
             } else {
+
                 showHome();
             }
         });
@@ -713,10 +761,19 @@ public class MainActivity extends Activity {
 
     private LinearLayout baseLayout() {
 
+        ScrollView scroll = new ScrollView(this);
+
+        scroll.setFillViewport(true);
+
         LinearLayout root = new LinearLayout(this);
 
-        root.setOrientation(LinearLayout.VERTICAL);
-        root.setGravity(Gravity.CENTER_HORIZONTAL);
+        root.setOrientation(
+                LinearLayout.VERTICAL
+        );
+
+        root.setGravity(
+                Gravity.CENTER_HORIZONTAL
+        );
 
         root.setPadding(
                 dp(18),
@@ -727,11 +784,8 @@ public class MainActivity extends Activity {
 
         root.setBackgroundColor(CREAM);
 
-        ScrollView scroll = new ScrollView(this);
-
         scroll.addView(root);
 
-        // يتم وضع ScrollView كواجهة فعلية
         setContentView(scroll);
 
         return root;
@@ -748,7 +802,11 @@ public class MainActivity extends Activity {
         b.setText(label);
         b.setTextSize(17);
         b.setTextColor(WHITE);
-        b.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+
+        b.setTypeface(
+                Typeface.DEFAULT,
+                Typeface.BOLD
+        );
 
         b.setAllCaps(false);
         b.setGravity(Gravity.CENTER);
@@ -773,6 +831,10 @@ public class MainActivity extends Activity {
         return b;
     }
 
+    // =====================================================
+    // SMALL BUTTON
+    // =====================================================
+
     private Button smallButton(String label) {
 
         Button b = new Button(this);
@@ -780,9 +842,12 @@ public class MainActivity extends Activity {
         b.setText(label);
         b.setTextSize(14);
         b.setTextColor(GREEN);
+
         b.setAllCaps(false);
 
-        b.setBackgroundColor(Color.TRANSPARENT);
+        b.setBackgroundColor(
+                Color.TRANSPARENT
+        );
 
         LinearLayout.LayoutParams lp =
                 new LinearLayout.LayoutParams(
@@ -803,7 +868,7 @@ public class MainActivity extends Activity {
     }
 
     // =====================================================
-    // TEXT
+    // TITLE
     // =====================================================
 
     private TextView title(String value) {
@@ -811,6 +876,7 @@ public class MainActivity extends Activity {
         TextView t = text(value, 25);
 
         t.setTextColor(BROWN);
+
         t.setTypeface(
                 Typeface.DEFAULT,
                 Typeface.BOLD
@@ -828,6 +894,10 @@ public class MainActivity extends Activity {
         return t;
     }
 
+    // =====================================================
+    // TEXT
+    // =====================================================
+
     private TextView text(
             String value,
             int size
@@ -838,7 +908,10 @@ public class MainActivity extends Activity {
         t.setText(value);
         t.setTextSize(size);
         t.setTextColor(BROWN);
-        t.setGravity(Gravity.CENTER_VERTICAL);
+
+        t.setGravity(
+                Gravity.CENTER_VERTICAL
+        );
 
         t.setPadding(
                 dp(5),
@@ -918,7 +991,10 @@ public class MainActivity extends Activity {
                 android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI
         );
 
-        startActivityForResult(intent, 100);
+        startActivityForResult(
+                intent,
+                100
+        );
     }
 
     @Override
