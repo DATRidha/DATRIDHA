@@ -897,6 +897,11 @@ public class MainActivity extends Activity {
 
             p.setColor(GOLD);
             c.drawCircle(x,y-r*1.55f,8,p);
-        }
+         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        showHome();
     }
 }
