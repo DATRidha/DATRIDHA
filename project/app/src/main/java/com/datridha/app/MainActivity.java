@@ -5,9 +5,11 @@ import android.os.Bundle;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.*;
 
 public class MainActivity extends Activity {
@@ -29,45 +31,129 @@ public class MainActivity extends Activity {
     }
 
     // =====================================================
-    // SPLASH
+    // SPLASH - FULL SCREEN OASIS DESIGN
     // =====================================================
 
     private void showSplash() {
 
         currentPage = "splash";
 
-        LinearLayout root = baseLayout();
+        getWindow().setStatusBarColor(Color.TRANSPARENT);
+        getWindow().setNavigationBarColor(Color.TRANSPARENT);
+
+        getWindow().getDecorView().setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+        );
+
+        FrameLayout root = new FrameLayout(this);
+
+        // صورة الواحة - تغطي كامل الشاشة
+        ImageView background = new ImageView(this);
+        background.setImageResource(R.drawable.oasis_home);
+        background.setScaleType(ImageView.ScaleType.CENTER_CROP);
+
+        root.addView(
+                background,
+                new FrameLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT
+                )
+        );
+
+        // طبقة شفافة خفيفة
+        View overlay = new View(this);
+        overlay.setBackgroundColor(
+                Color.argb(60, 0, 0, 0)
+        );
+
+        root.addView(
+                overlay,
+                new FrameLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT
+                )
+        );
+
+        // =================================================
+        // LOGO + BRAND
+        // =================================================
+
+        LinearLayout brand = new LinearLayout(this);
+        brand.setOrientation(LinearLayout.VERTICAL);
+        brand.setGravity(Gravity.CENTER_HORIZONTAL);
 
         ImageView logo = new ImageView(this);
         logo.setImageResource(R.drawable.app_icon);
         logo.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
 
-        root.addView(
+        brand.addView(
                 logo,
                 new LinearLayout.LayoutParams(
-                        -1,
-                        dp(180)
+                        dp(125),
+                        dp(125)
                 )
         );
 
-        TextView title = title("DATRIDHA");
-        root.addView(title);
+        TextView title = new TextView(this);
+        title.setText("DATRIDHA");
+        title.setTextColor(WHITE);
+        title.setTextSize(30);
+        title.setTypeface(
+                Typeface.DEFAULT,
+                Typeface.BOLD
+        );
+        title.setGravity(Gravity.CENTER);
 
-        TextView subtitle = text(
+        brand.addView(title);
+
+        TextView subtitle = new TextView(this);
+
+        subtitle.setText(
                 language.equals("fr")
                         ? "Deglet Nour de Bechni\nCommerce direct du producteur à l'acheteur"
                         : language.equals("en")
                         ? "Deglet Nour dates from Bechni\nDirect trade from producer to buyer"
-                        : "دقلة النور من بشني\nتجارة مباشرة من المنتج إلى المشتري",
-                18
+                        : "دقلة النور من بشني\nتجارة مباشرة من المنتج إلى المشتري"
         );
 
+        subtitle.setTextColor(WHITE);
+        subtitle.setTextSize(17);
         subtitle.setGravity(Gravity.CENTER);
-        root.addView(subtitle);
+        subtitle.setTypeface(
+                Typeface.DEFAULT,
+                Typeface.NORMAL
+        );
 
-        space(root, 25);
+        brand.addView(subtitle);
 
-        Button start = button(
+        FrameLayout.LayoutParams brandParams =
+                new FrameLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT
+                );
+
+        brandParams.gravity =
+                Gravity.TOP | Gravity.CENTER_HORIZONTAL;
+
+        brandParams.topMargin = dp(65);
+
+        root.addView(
+                brand,
+                brandParams
+        );
+
+        // =================================================
+        // START BUTTON
+        // =================================================
+
+        Button startButton = new Button(this);
+
+        startButton.setText(
                 language.equals("fr")
                         ? "Commencer"
                         : language.equals("en")
@@ -75,30 +161,81 @@ public class MainActivity extends Activity {
                         : "ابدأ الآن"
         );
 
-        start.setOnClickListener(v -> showHome());
-        root.addView(start);
+        startButton.setTextSize(18);
+        startButton.setTextColor(WHITE);
+        startButton.setTypeface(
+                Typeface.DEFAULT,
+                Typeface.BOLD
+        );
+        startButton.setAllCaps(false);
 
-        space(root, 15);
+        GradientDrawable startBackground =
+                new GradientDrawable();
 
-        TextView languageTitle = text(
-                language.equals("fr")
-                        ? "Choisir la langue"
-                        : language.equals("en")
-                        ? "Choose language"
-                        : "اختر اللغة",
-                15
+        startBackground.setColor(GREEN);
+        startBackground.setCornerRadius(
+                dp(35)
+        );
+        startBackground.setStroke(
+                dp(2),
+                GOLD
         );
 
-        languageTitle.setGravity(Gravity.CENTER);
-        root.addView(languageTitle);
+        startButton.setBackground(
+                startBackground
+        );
 
-        LinearLayout languages = new LinearLayout(this);
-        languages.setOrientation(LinearLayout.HORIZONTAL);
-        languages.setGravity(Gravity.CENTER);
+        startButton.setOnClickListener(
+                v -> showHome()
+        );
 
-        Button ar = smallButton("العربية");
-        Button fr = smallButton("Français");
-        Button en = smallButton("English");
+        FrameLayout.LayoutParams startParams =
+                new FrameLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        dp(60)
+                );
+
+        startParams.gravity =
+                Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
+
+        startParams.setMargins(
+                dp(45),
+                0,
+                dp(45),
+                dp(90)
+        );
+
+        root.addView(
+                startButton,
+                startParams
+        );
+
+        // =================================================
+        // LANGUAGE BUTTONS
+        // =================================================
+
+        LinearLayout languages =
+                new LinearLayout(this);
+
+        languages.setOrientation(
+                LinearLayout.HORIZONTAL
+        );
+
+        languages.setGravity(
+                Gravity.CENTER
+        );
+
+        Button ar = splashLanguageButton(
+                "العربية"
+        );
+
+        Button fr = splashLanguageButton(
+                "Français"
+        );
+
+        Button en = splashLanguageButton(
+                "English"
+        );
 
         ar.setOnClickListener(v -> {
             language = "ar";
@@ -119,7 +256,44 @@ public class MainActivity extends Activity {
         languages.addView(fr);
         languages.addView(en);
 
-        root.addView(languages);
+        FrameLayout.LayoutParams languageParams =
+                new FrameLayout.LayoutParams(
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT
+                );
+
+        languageParams.gravity =
+                Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
+
+        languageParams.bottomMargin = dp(15);
+
+        root.addView(
+                languages,
+                languageParams
+        );
+
+        setContentView(root);
+    }
+
+    // =====================================================
+    // SPLASH LANGUAGE BUTTON
+    // =====================================================
+
+    private Button splashLanguageButton(
+            String label
+    ) {
+
+        Button b = new Button(this);
+
+        b.setText(label);
+        b.setTextColor(WHITE);
+        b.setTextSize(13);
+        b.setAllCaps(false);
+        b.setBackgroundColor(
+                Color.TRANSPARENT
+        );
+
+        return b;
     }
 
     // =====================================================
@@ -129,6 +303,10 @@ public class MainActivity extends Activity {
     private void showHome() {
 
         currentPage = "home";
+
+        getWindow().getDecorView().setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+        );
 
         LinearLayout root = baseLayout();
 
@@ -152,6 +330,7 @@ public class MainActivity extends Activity {
         );
 
         description.setGravity(Gravity.CENTER);
+
         root.addView(description);
 
         space(root, 20);
@@ -164,7 +343,10 @@ public class MainActivity extends Activity {
                         : "شراء التمور"
         );
 
-        buy.setOnClickListener(v -> showBuy());
+        buy.setOnClickListener(
+                v -> showBuy()
+        );
+
         root.addView(buy);
 
         Button sell = button(
@@ -175,7 +357,10 @@ public class MainActivity extends Activity {
                         : "بيع التمور"
         );
 
-        sell.setOnClickListener(v -> showSell());
+        sell.setOnClickListener(
+                v -> showSell()
+        );
+
         root.addView(sell);
 
         Button orders = button(
@@ -186,7 +371,10 @@ public class MainActivity extends Activity {
                         : "طلباتي"
         );
 
-        orders.setOnClickListener(v -> showOrders());
+        orders.setOnClickListener(
+                v -> showOrders()
+        );
+
         root.addView(orders);
 
         Button contact = button(
@@ -197,7 +385,10 @@ public class MainActivity extends Activity {
                         : "الاتصال بنا"
         );
 
-        contact.setOnClickListener(v -> showContact());
+        contact.setOnClickListener(
+                v -> showContact()
+        );
+
         root.addView(contact);
 
         Button settings = button(
@@ -208,7 +399,10 @@ public class MainActivity extends Activity {
                         : "الإعدادات"
         );
 
-        settings.setOnClickListener(v -> showSettings());
+        settings.setOnClickListener(
+                v -> showSettings()
+        );
+
         root.addView(settings);
     }
 
@@ -266,9 +460,13 @@ public class MainActivity extends Activity {
             String price
     ) {
 
-        LinearLayout card = new LinearLayout(this);
+        LinearLayout card =
+                new LinearLayout(this);
 
-        card.setOrientation(LinearLayout.VERTICAL);
+        card.setOrientation(
+                LinearLayout.VERTICAL
+        );
+
         card.setPadding(
                 dp(18),
                 dp(15),
@@ -276,9 +474,14 @@ public class MainActivity extends Activity {
                 dp(15)
         );
 
-        card.setGravity(Gravity.CENTER);
+        card.setGravity(
+                Gravity.CENTER
+        );
 
-        TextView n = text(name, 19);
+        TextView n = text(
+                name,
+                19
+        );
 
         n.setTypeface(
                 Typeface.DEFAULT,
@@ -290,8 +493,13 @@ public class MainActivity extends Activity {
 
         card.addView(n);
 
-        TextView a = text(arabic, 16);
+        TextView a = text(
+                arabic,
+                16
+        );
+
         a.setGravity(Gravity.CENTER);
+
         card.addView(a);
 
         TextView q = text(
@@ -300,6 +508,7 @@ public class MainActivity extends Activity {
         );
 
         q.setGravity(Gravity.CENTER);
+
         card.addView(q);
 
         Button details = button(
@@ -329,7 +538,10 @@ public class MainActivity extends Activity {
                 dp(8)
         );
 
-        root.addView(card, lp);
+        root.addView(
+                card,
+                lp
+        );
     }
 
     // =====================================================
@@ -362,7 +574,10 @@ public class MainActivity extends Activity {
                 18
         );
 
-        product.setGravity(Gravity.CENTER);
+        product.setGravity(
+                Gravity.CENTER
+        );
+
         root.addView(product);
 
         space(root, 20);
@@ -375,7 +590,10 @@ public class MainActivity extends Activity {
                         : "الاتصال بالبائع"
         );
 
-        call.setOnClickListener(v -> callPhone());
+        call.setOnClickListener(
+                v -> callPhone()
+        );
+
         root.addView(call);
 
         Button order = button(
@@ -459,7 +677,10 @@ public class MainActivity extends Activity {
                         : "إضافة صورة"
         );
 
-        photo.setOnClickListener(v -> chooseImage());
+        photo.setOnClickListener(
+                v -> chooseImage()
+        );
+
         root.addView(photo);
 
         Button publish = button(
@@ -472,7 +693,12 @@ public class MainActivity extends Activity {
 
         publish.setOnClickListener(v -> {
 
-            if (quantity.getText().toString().trim().isEmpty()) {
+            if (
+                    quantity.getText()
+                            .toString()
+                            .trim()
+                            .isEmpty()
+            ) {
 
                 quantity.setError(
                         language.equals("fr")
@@ -529,7 +755,9 @@ public class MainActivity extends Activity {
                 18
         );
 
-        empty.setGravity(Gravity.CENTER);
+        empty.setGravity(
+                Gravity.CENTER
+        );
 
         root.addView(empty);
     }
@@ -558,7 +786,7 @@ public class MainActivity extends Activity {
         root.addView(text(
                 "DATRIDHA\n\n" +
                 "دقلة النور من بشني\n\n" +
-                "Téléphone : 51 022 448\n" +
+                "Téléphone : +216 51022448\n" +
                 "Email : ridhatouil1992@gmail.com",
                 18
         ));
@@ -571,7 +799,10 @@ public class MainActivity extends Activity {
                         : "اتصال هاتفي"
         );
 
-        phone.setOnClickListener(v -> callPhone());
+        phone.setOnClickListener(
+                v -> callPhone()
+        );
+
         root.addView(phone);
 
         Button email = button(
@@ -582,7 +813,10 @@ public class MainActivity extends Activity {
                         : "إرسال بريد إلكتروني"
         );
 
-        email.setOnClickListener(v -> sendEmail());
+        email.setOnClickListener(
+                v -> sendEmail()
+        );
+
         root.addView(email);
     }
 
@@ -669,7 +903,9 @@ public class MainActivity extends Activity {
                         : "المساعدة"
         );
 
-        help.setOnClickListener(v -> showContact());
+        help.setOnClickListener(
+                v -> showContact()
+        );
 
         root.addView(help);
     }
@@ -681,10 +917,15 @@ public class MainActivity extends Activity {
     private void changeLanguage() {
 
         if ("ar".equals(language)) {
+
             language = "fr";
+
         } else if ("fr".equals(language)) {
+
             language = "en";
+
         } else {
+
             language = "ar";
         }
 
@@ -695,11 +936,17 @@ public class MainActivity extends Activity {
     // HEADER
     // =====================================================
 
-    private void addHeader(LinearLayout root) {
+    private void addHeader(
+            LinearLayout root
+    ) {
 
-        ImageView logo = new ImageView(this);
+        ImageView logo =
+                new ImageView(this);
 
-        logo.setImageResource(R.drawable.app_icon);
+        logo.setImageResource(
+                R.drawable.app_icon
+        );
+
         logo.setScaleType(
                 ImageView.ScaleType.CENTER_INSIDE
         );
@@ -712,7 +959,9 @@ public class MainActivity extends Activity {
                 )
         );
 
-        View line = new View(this);
+        View line =
+                new View(this);
+
         line.setBackgroundColor(GOLD);
 
         root.addView(
@@ -727,10 +976,12 @@ public class MainActivity extends Activity {
     }
 
     // =====================================================
-    // BACK BUTTON
+    // BACK
     // =====================================================
 
-    private void addBackButton(LinearLayout root) {
+    private void addBackButton(
+            LinearLayout root
+    ) {
 
         Button back = smallButton(
                 language.equals("fr")
@@ -761,11 +1012,13 @@ public class MainActivity extends Activity {
 
     private LinearLayout baseLayout() {
 
-        ScrollView scroll = new ScrollView(this);
+        ScrollView scroll =
+                new ScrollView(this);
 
         scroll.setFillViewport(true);
 
-        LinearLayout root = new LinearLayout(this);
+        LinearLayout root =
+                new LinearLayout(this);
 
         root.setOrientation(
                 LinearLayout.VERTICAL
@@ -782,7 +1035,9 @@ public class MainActivity extends Activity {
                 dp(20)
         );
 
-        root.setBackgroundColor(CREAM);
+        root.setBackgroundColor(
+                CREAM
+        );
 
         scroll.addView(root);
 
@@ -795,9 +1050,12 @@ public class MainActivity extends Activity {
     // BUTTON
     // =====================================================
 
-    private Button button(String label) {
+    private Button button(
+            String label
+    ) {
 
-        Button b = new Button(this);
+        Button b =
+                new Button(this);
 
         b.setText(label);
         b.setTextSize(17);
@@ -811,7 +1069,14 @@ public class MainActivity extends Activity {
         b.setAllCaps(false);
         b.setGravity(Gravity.CENTER);
 
-        b.setBackgroundColor(GREEN);
+        GradientDrawable bg =
+                new GradientDrawable();
+
+        bg.setColor(GREEN);
+        bg.setCornerRadius(dp(14));
+        bg.setStroke(dp(1), GOLD);
+
+        b.setBackground(bg);
 
         LinearLayout.LayoutParams lp =
                 new LinearLayout.LayoutParams(
@@ -835,9 +1100,12 @@ public class MainActivity extends Activity {
     // SMALL BUTTON
     // =====================================================
 
-    private Button smallButton(String label) {
+    private Button smallButton(
+            String label
+    ) {
 
-        Button b = new Button(this);
+        Button b =
+                new Button(this);
 
         b.setText(label);
         b.setTextSize(14);
@@ -871,9 +1139,12 @@ public class MainActivity extends Activity {
     // TITLE
     // =====================================================
 
-    private TextView title(String value) {
+    private TextView title(
+            String value
+    ) {
 
-        TextView t = text(value, 25);
+        TextView t =
+                text(value, 25);
 
         t.setTextColor(BROWN);
 
@@ -882,7 +1153,9 @@ public class MainActivity extends Activity {
                 Typeface.BOLD
         );
 
-        t.setGravity(Gravity.CENTER);
+        t.setGravity(
+                Gravity.CENTER
+        );
 
         t.setPadding(
                 dp(5),
@@ -903,7 +1176,8 @@ public class MainActivity extends Activity {
             int size
     ) {
 
-        TextView t = new TextView(this);
+        TextView t =
+                new TextView(this);
 
         t.setText(value);
         t.setTextSize(size);
@@ -927,9 +1201,12 @@ public class MainActivity extends Activity {
     // INPUT
     // =====================================================
 
-    private EditText input(String hint) {
+    private EditText input(
+            String hint
+    ) {
 
-        EditText e = new EditText(this);
+        EditText e =
+                new EditText(this);
 
         e.setHint(hint);
         e.setTextSize(16);
@@ -969,7 +1246,8 @@ public class MainActivity extends Activity {
             int size
     ) {
 
-        Space s = new Space(this);
+        Space s =
+                new Space(this);
 
         root.addView(
                 s,
@@ -986,10 +1264,11 @@ public class MainActivity extends Activity {
 
     private void chooseImage() {
 
-        Intent intent = new Intent(
-                Intent.ACTION_PICK,
-                android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-        );
+        Intent intent =
+                new Intent(
+                        Intent.ACTION_PICK,
+                        android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+                );
 
         startActivityForResult(
                 intent,
@@ -1035,10 +1314,13 @@ public class MainActivity extends Activity {
 
         try {
 
-            Intent intent = new Intent(
-                    Intent.ACTION_DIAL,
-                    Uri.parse("tel:51022448")
-            );
+            Intent intent =
+                    new Intent(
+                            Intent.ACTION_DIAL,
+                            Uri.parse(
+                                    "tel:+21651022448"
+                            )
+                    );
 
             startActivity(intent);
 
@@ -1046,7 +1328,7 @@ public class MainActivity extends Activity {
 
             Toast.makeText(
                     this,
-                    "51 022 448",
+                    "+216 51022448",
                     Toast.LENGTH_SHORT
             ).show();
         }
@@ -1060,9 +1342,10 @@ public class MainActivity extends Activity {
 
         try {
 
-            Intent intent = new Intent(
-                    Intent.ACTION_SENDTO
-            );
+            Intent intent =
+                    new Intent(
+                            Intent.ACTION_SENDTO
+                    );
 
             intent.setData(
                     Uri.parse(
@@ -1091,13 +1374,15 @@ public class MainActivity extends Activity {
     // DP
     // =====================================================
 
-    private int dp(int value) {
+    private int dp(
+            int value
+    ) {
 
         return (int) (
                 value *
-                getResources()
-                        .getDisplayMetrics()
-                        .density
+                        getResources()
+                                .getDisplayMetrics()
+                                .density
         );
     }
 
