@@ -736,3 +736,5 @@ public class MainActivity extends AppCompatActivity {
                 "En cours",
                 "In progress")
 );  
+    }
+}
