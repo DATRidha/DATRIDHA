@@ -35,7 +35,12 @@ jobs:
 
           PROJECT_DIR=$(dirname "$SETTINGS")
           echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_ENV"
-
+      - name: Apply latest app code
+        run: |
+          set -e
+          mkdir -p "$PROJECT_DIR/app/src/main/java/com/datridha/app"
+          cp project/app/src/main/java/com/datridha/app/MainActivity.java \
+             "$PROJECT_DIR/app/src/main/java/com/datridha/app/MainActivity.java"
       - name: Set up Java 17
         uses: actions/setup-java@v5
         with:
