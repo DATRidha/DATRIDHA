@@ -726,11 +726,13 @@ public class MainActivity extends AppCompatActivity {
 
         root.addView(tabs);
 
-        addOrder(
-                tr("طلب دقلة نور",
-                        "Commande Deglet Nour",
-                        "Deglet Nour order"),
-                "2 tonnes",
-                "05/10/2026",
-                tr("قيد التنفيذ",
-                        "En cours
+      addOrder(
+        tr("طلب دقلة نور",
+                "Commande Deglet Nour",
+                "Deglet Nour order"),
+        "2 tonnes",
+        "05/10/2026",
+        tr("قيد التنفيذ",
+                "En cours",
+                "In progress")
+);  
