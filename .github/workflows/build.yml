@@ -14,6 +14,7 @@ jobs:
       - name: Prepare complete Android project
         run: |
           set -e
+
           rm -rf build_project
           mkdir -p build_project
 
@@ -34,13 +35,103 @@ jobs:
           fi
 
           PROJECT_DIR=$(dirname "$SETTINGS")
+
           echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_ENV"
+
+          echo "Android project:"
+          echo "$PROJECT_DIR"
+
+      - name: Install DATRIDHA realistic images
+        run: |
+          set -e
+
+          echo "Preparing DATRIDHA visual assets..."
+
+          mkdir -p build_project/datridha_assets
+
+          unzip -q DATRIDHA_REAL_ASSETS_WEBP.zip \
+            -d build_project/datridha_assets
+
+          mkdir -p "$PROJECT_DIR/app/src/main/res/drawable"
+
+          cp build_project/datridha_assets/splash_oasis.webp \
+            "$PROJECT_DIR/app/src/main/res/drawable/splash_oasis.webp"
+
+          cp build_project/datridha_assets/oasis_home.webp \
+            "$PROJECT_DIR/app/src/main/res/drawable/oasis_home.webp"
+
+          cp build_project/datridha_assets/dates_deglet_nour.webp \
+            "$PROJECT_DIR/app/src/main/res/drawable/dates_deglet_nour.webp"
+
+          cp build_project/datridha_assets/app_icon.webp \
+            "$PROJECT_DIR/app/src/main/res/drawable/app_icon.webp"
+
+          echo "Images installed successfully."
+
+          ls -lh "$PROJECT_DIR/app/src/main/res/drawable/"
+
       - name: Apply latest app code
         run: |
           set -e
+
           mkdir -p "$PROJECT_DIR/app/src/main/java/com/datridha/app"
+
           cp project/app/src/main/java/com/datridha/app/MainActivity.java \
              "$PROJECT_DIR/app/src/main/java/com/datridha/app/MainActivity.java"
+
+      - name: Apply DATRIDHA application icon
+        run: |
+          set -e
+
+          MANIFEST=$(find "$PROJECT_DIR/app/src/main" \
+            -name "AndroidManifest.xml" \
+            -print -quit)
+
+          if [ -z "$MANIFEST" ]; then
+            echo "ERROR: AndroidManifest.xml not found"
+            exit 1
+          fi
+
+          echo "Manifest found:"
+          echo "$MANIFEST"
+
+          python3 - "$MANIFEST" <<'PY'
+          import sys
+          import re
+
+          path = sys.argv[1]
+
+          with open(path, "r", encoding="utf-8") as f:
+              text = f.read()
+
+          if 'android:icon=' in text:
+              text = re.sub(
+                  r'android:icon="[^"]*"',
+                  'android:icon="@drawable/app_icon"',
+                  text,
+                  count=1
+              )
+          else:
+              text = text.replace(
+                  '<application',
+                  '<application android:icon="@drawable/app_icon"',
+                  1
+              )
+
+          if 'android:roundIcon=' in text:
+              text = re.sub(
+                  r'android:roundIcon="[^"]*"',
+                  'android:roundIcon="@drawable/app_icon"',
+                  text,
+                  count=1
+              )
+
+          with open(path, "w", encoding="utf-8") as f:
+              f.write(text)
+          PY
+
+          echo "DATRIDHA icon configured."
+
       - name: Set up Java 17
         uses: actions/setup-java@v5
         with:
@@ -55,11 +146,12 @@ jobs:
       - name: Build APK
         run: |
           set -e
+
           gradle -p "$PROJECT_DIR" clean assembleDebug
 
       - name: Upload final APK
         uses: actions/upload-artifact@v4
         with:
-          name: DATRIDHA-FINAL-EN-AR-FR
+          name: DATRIDHA-FINAL-REAL-IMAGES
           path: build_project/**/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
