@@ -77,7 +77,7 @@ jobs:
 
           echo "MainActivity installed successfully."
 
-      - name: Set application icon
+            - name: Set application icon
         run: |
           set -e
 
@@ -90,12 +90,20 @@ jobs:
             exit 1
           fi
 
-          sed -i \
-            's|android:icon="@drawable/[^"]*"|android:icon="@drawable/app_icon"|g' \
+          echo "Manifest found:"
+          echo "$MANIFEST"
+
+          sed -i -E \
+            's|android:icon="@[^"]*"|android:icon="@drawable/app_icon"|g; s|android:roundIcon="@[^"]*"|android:roundIcon="@drawable/app_icon"|g' \
             "$MANIFEST"
 
-          echo "Application icon configured."
+          test -s "$PROJECT_DIR/app/src/main/res/drawable/app_icon.png"
 
+          echo "Launcher icon configured:"
+          grep -nE 'android:(icon|roundIcon)=' "$MANIFEST"
+
+          echo "Exact launcher icon file:"
+          ls -lh "$PROJECT_DIR/app/src/main/res/drawable/app_icon.png"
       - name: Set up Java 17
         uses: actions/setup-java@v5
         with:
