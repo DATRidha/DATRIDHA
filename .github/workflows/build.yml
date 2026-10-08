@@ -61,7 +61,7 @@ jobs:
           cp /tmp/datridha_assets/dates_deglet_nour.png \
             "$PROJECT_DIR/app/src/main/res/drawable/dates_deglet_nour.png"
 
-          cp /tmp/datridha_assets/app_icon.png \
+          cp /tmp/datridha_assets/logo_datridha.png \
             "$PROJECT_DIR/app/src/main/res/drawable/app_icon.png"
 
           echo "Visual assets installed successfully."
