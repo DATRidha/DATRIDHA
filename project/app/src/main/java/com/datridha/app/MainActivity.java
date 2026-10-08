@@ -1,435 +1,1041 @@
-private void showSplash() {
+package com.datridha.app;
 
-    currentPage = "splash";
+import android.app.Activity;
+import android.os.Bundle;
+import android.content.Intent;
+import android.graphics.*;
+import android.graphics.drawable.GradientDrawable;
+import android.net.Uri;
+import android.view.*;
+import android.widget.*;
 
-    getWindow().setStatusBarColor(Color.TRANSPARENT);
-    getWindow().setNavigationBarColor(Color.TRANSPARENT);
+public class MainActivity extends Activity {
 
-    getWindow().getDecorView().setSystemUiVisibility(
-            View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
-            View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
-            View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-    );
+    private String currentPage = "splash";
+    private String language = "ar";
 
-    FrameLayout root = new FrameLayout(this);
+    private final int GREEN = Color.rgb(23,107,58);
+    private final int LIGHT_GREEN = Color.rgb(46,139,87);
+    private final int GOLD = Color.rgb(212,175,55);
+    private final int CREAM = Color.rgb(249,244,236);
+    private final int BROWN = Color.rgb(91,58,30);
+    private final int WHITE = Color.WHITE;
 
-    // الخلفية
-    ImageView background = new ImageView(this);
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
-    background.setImageResource(
-            R.drawable.splash_oasis
-    );
+        getWindow().setStatusBarColor(GREEN);
+        getWindow().setNavigationBarColor(GREEN);
 
-    background.setScaleType(
-            ImageView.ScaleType.CENTER_CROP
-    );
+        showSplash();
+    }
 
-    root.addView(
-            background,
-            new FrameLayout.LayoutParams(
-                    -1,
-                    -1
-            )
-    );
+    private TextView text(String value, float size, int color) {
+        TextView t = new TextView(this);
+        t.setText(value);
+        t.setTextSize(size);
+        t.setTextColor(color);
+        t.setGravity(Gravity.CENTER);
+        t.setPadding(8, 8, 8, 8);
+        return t;
+    }
 
-    // طبقة شفافة لتحسين وضوح المحتوى
-    View shade = new View(this);
+    private GradientDrawable bg(int color, float radius) {
+        GradientDrawable g = new GradientDrawable();
+        g.setColor(color);
+        g.setCornerRadius(radius);
+        return g;
+    }
 
-    GradientDrawable shadeBg =
-            new GradientDrawable(
-                    GradientDrawable.Orientation.TOP_BOTTOM,
-                    new int[]{
-                            0x18000000,
-                            0x35000000,
-                            0xB0000000
-                    }
-            );
+    private Button button(String title) {
+        Button b = new Button(this);
+        b.setText(title);
+        b.setTextSize(16);
+        b.setTextColor(WHITE);
+        b.setAllCaps(false);
+        b.setGravity(Gravity.CENTER);
+        b.setPadding(15, 5, 15, 5);
+        b.setBackground(bg(GREEN, 45));
+        return b;
+    }
 
-    shade.setBackground(shadeBg);
+    private void showSplash() {
 
-    root.addView(
-            shade,
-            new FrameLayout.LayoutParams(
-                    -1,
-                    -1
-            )
-    );
+        currentPage = "splash";
 
-    // المحتوى
-    LinearLayout content =
-            new LinearLayout(this);
+        getWindow().setStatusBarColor(Color.TRANSPARENT);
+        getWindow().setNavigationBarColor(Color.TRANSPARENT);
 
-    content.setOrientation(
-            LinearLayout.VERTICAL
-    );
+        getWindow().getDecorView().setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
+                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
+                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+        );
 
-    content.setGravity(
-            Gravity.CENTER_HORIZONTAL
-    );
+        FrameLayout root = new FrameLayout(this);
 
-    content.setPadding(
-            24,
-            42,
-            24,
-            24
-    );
+        ImageView background = new ImageView(this);
 
-    FrameLayout.LayoutParams contentLp =
-            new FrameLayout.LayoutParams(
-                    -1,
-                    -1
-            );
+        background.setImageResource(
+                R.drawable.splash_oasis
+        );
 
-    contentLp.gravity = Gravity.CENTER;
+        background.setScaleType(
+                ImageView.ScaleType.CENTER_CROP
+        );
 
-    root.addView(
-            content,
-            contentLp
-    );
+        root.addView(
+                background,
+                new FrameLayout.LayoutParams(
+                        -1,
+                        -1
+                )
+        );
 
-    // الشعار
-    ImageView logo =
-            new ImageView(this);
+        View shade = new View(this);
 
-    logo.setImageResource(
-            R.drawable.app_icon
-    );
-
-    logo.setScaleType(
-            ImageView.ScaleType.CENTER_INSIDE
-    );
-
-    LinearLayout.LayoutParams logoLp =
-            new LinearLayout.LayoutParams(
-                    132,
-                    132
-            );
-
-    logoLp.gravity =
-            Gravity.CENTER_HORIZONTAL;
-
-    content.addView(
-            logo,
-            logoLp
-    );
-
-    // اسم التطبيق
-    TextView brand =
-            text(
-                    "DATRIDHA",
-                    32,
-                    GOLD
-            );
-
-    brand.setTypeface(
-            Typeface.create(
-                    Typeface.SERIF,
-                    Typeface.BOLD
-            )
-    );
-
-    brand.setLetterSpacing(
-            .15f
-    );
-
-    brand.setShadowLayer(
-            7,
-            0,
-            3,
-            Color.BLACK
-    );
-
-    content.addView(
-            brand,
-            new LinearLayout.LayoutParams(
-                    -1,
-                    58
-            )
-    );
-
-    // الاسم بالعربية
-    TextView arabic =
-            text(
-                    "دَقْلَةُ النُّور مِنْ بَشْنِي",
-                    22,
-                    WHITE
-            );
-
-    arabic.setTypeface(
-            Typeface.DEFAULT,
-            Typeface.BOLD
-    );
-
-    arabic.setShadowLayer(
-            6,
-            0,
-            2,
-            Color.BLACK
-    );
-
-    content.addView(
-            arabic,
-            new LinearLayout.LayoutParams(
-                    -1,
-                    52
-            )
-    );
-
-    // الفرنسية
-    TextView french =
-            text(
-                    "Deglet Nour de Bechni",
-                    17,
-                    WHITE
-            );
-
-    french.setTypeface(
-            Typeface.create(
-                    Typeface.SERIF,
-                    Typeface.ITALIC
-            )
-    );
-
-    french.setShadowLayer(
-            5,
-            0,
-            2,
-            Color.BLACK
-    );
-
-    content.addView(
-            french,
-            new LinearLayout.LayoutParams(
-                    -1,
-                    42
-            )
-    );
-
-    addSpace(
-            content,
-            10
-    );
-
-    // شارات الثقة
-    LinearLayout badges =
-            new LinearLayout(this);
-
-    badges.setGravity(
-            Gravity.CENTER
-    );
-
-    badges.setPadding(
-            0,
-            0,
-            0,
-            8
-    );
-
-    String[] badgeTexts = {
-            "موثوق",
-            "جودة",
-            "تجارة مباشرة"
-    };
-
-    for (String badgeText : badgeTexts) {
-
-        TextView badge =
-                text(
-                        badgeText,
-                        13,
-                        GREEN
+        GradientDrawable shadeBg =
+                new GradientDrawable(
+                        GradientDrawable.Orientation.TOP_BOTTOM,
+                        new int[]{
+                                0x22000000,
+                                0x55000000,
+                                0x99000000
+                        }
                 );
 
-        badge.setTypeface(
+        shade.setBackground(shadeBg);
+
+        root.addView(
+                shade,
+                new FrameLayout.LayoutParams(
+                        -1,
+                        -1
+                )
+        );
+
+        LinearLayout content =
+                new LinearLayout(this);
+
+        content.setOrientation(
+                LinearLayout.VERTICAL
+        );
+
+        content.setGravity(
+                Gravity.CENTER_HORIZONTAL
+        );
+
+        content.setPadding(
+                25,
+                55,
+                25,
+                25
+        );
+
+        FrameLayout.LayoutParams contentLp =
+                new FrameLayout.LayoutParams(
+                        -1,
+                        -1
+                );
+
+        contentLp.gravity = Gravity.CENTER;
+
+        root.addView(
+                content,
+                contentLp
+        );
+
+        ImageView logo =
+                new ImageView(this);
+
+        logo.setImageResource(
+                R.drawable.app_icon
+        );
+
+        logo.setScaleType(
+                ImageView.ScaleType.CENTER_INSIDE
+        );
+
+        LinearLayout.LayoutParams logoLp =
+                new LinearLayout.LayoutParams(
+                        150,
+                        150
+                );
+
+        logoLp.gravity =
+                Gravity.CENTER_HORIZONTAL;
+
+        content.addView(
+                logo,
+                logoLp
+        );
+
+        TextView brand =
+                text(
+                        "DATRIDHA",
+                        34,
+                        GOLD
+                );
+
+        brand.setTypeface(
+                Typeface.create(
+                        Typeface.SERIF,
+                        Typeface.BOLD
+                )
+        );
+
+        brand.setLetterSpacing(.16f);
+
+        brand.setShadowLayer(
+                8,
+                0,
+                3,
+                Color.BLACK
+        );
+
+        content.addView(
+                brand,
+                new LinearLayout.LayoutParams(
+                        -1,
+                        65
+                )
+        );
+
+        TextView arabic =
+                text(
+                        "دَقْلَةُ النُّور مِنْ بَشْنِي",
+                        22,
+                        WHITE
+                );
+
+        arabic.setTypeface(
                 Typeface.DEFAULT,
                 Typeface.BOLD
         );
 
-        badge.setBackground(
-                bg(
-                        0xFFF7E9D7,
-                        28
+        arabic.setShadowLayer(
+                6,
+                0,
+                2,
+                Color.BLACK
+        );
+
+        content.addView(
+                arabic,
+                new LinearLayout.LayoutParams(
+                        -1,
+                        55
                 )
         );
 
-        badge.setPadding(
-                12,
-                5,
-                12,
-                5
-        );
-
-        LinearLayout.LayoutParams bp =
-                new LinearLayout.LayoutParams(
-                        -2,
-                        38
+        TextView french =
+                text(
+                        "Deglet Nour de Bechni",
+                        18,
+                        WHITE
                 );
 
-        bp.setMargins(
-                4,
+        french.setTypeface(
+                Typeface.create(
+                        Typeface.SERIF,
+                        Typeface.ITALIC
+                )
+        );
+
+        french.setShadowLayer(
+                5,
                 0,
-                4,
+                2,
+                Color.BLACK
+        );
+
+        content.addView(
+                french,
+                new LinearLayout.LayoutParams(
+                        -1,
+                        45
+                )
+        );
+
+        TextView slogan =
+                text(
+                        "Achetez • Vendez • Échangez",
+                        17,
+                        WHITE
+                );
+
+        slogan.setShadowLayer(
+                5,
+                0,
+                2,
+                Color.BLACK
+        );
+
+        content.addView(
+                slogan,
+                new LinearLayout.LayoutParams(
+                        -1,
+                        45
+                )
+        );
+
+        addSpace(
+                content,
+                20
+        );
+
+        Button start =
+                button("ابدأ الآن");
+
+        start.setTextSize(19);
+
+        start.setTypeface(
+                Typeface.DEFAULT,
+                Typeface.BOLD
+        );
+
+        start.setBackground(
+                bg(GREEN, 55)
+        );
+
+        start.setOnClickListener(
+                v -> showHome()
+        );
+
+        LinearLayout.LayoutParams startLp =
+                new LinearLayout.LayoutParams(
+                        270,
+                        60
+                );
+
+        startLp.gravity =
+                Gravity.CENTER_HORIZONTAL;
+
+        content.addView(
+                start,
+                startLp
+        );
+
+        LinearLayout languages =
+                new LinearLayout(this);
+
+        languages.setGravity(
+                Gravity.CENTER
+        );
+
+        languages.setPadding(
+                0,
+                12,
+                0,
                 0
         );
 
-        badges.addView(
-                badge,
-                bp
+        Button ar =
+                button("العربية");
+
+        Button fr =
+                button("Français");
+
+        Button en =
+                button("English");
+
+        ar.setOnClickListener(v -> {
+            language = "ar";
+            showSplash();
+        });
+
+        fr.setOnClickListener(v -> {
+            language = "fr";
+            showSplash();
+        });
+
+        en.setOnClickListener(v -> {
+            language = "en";
+            showSplash();
+        });
+
+        languages.addView(
+                ar,
+                new LinearLayout.LayoutParams(
+                        100,
+                        48
+                )
+        );
+
+        languages.addView(
+                fr,
+                new LinearLayout.LayoutParams(
+                        100,
+                        48
+                )
+        );
+
+        languages.addView(
+                en,
+                new LinearLayout.LayoutParams(
+                        100,
+                        48
+                )
+        );
+
+        content.addView(languages);
+
+        setContentView(root);
+    }
+
+    private void showHome() {
+
+        currentPage = "home";
+
+        getWindow().getDecorView()
+                .setSystemUiVisibility(0);
+
+        LinearLayout root = baseLayout();
+
+        addHeader(root, "DATRIDHA");
+
+        TextView welcome = text(
+                "مرحباً بكم في DATRIDHA",
+                24,
+                GREEN
+        );
+
+        welcome.setTypeface(
+                Typeface.DEFAULT,
+                Typeface.BOLD
+        );
+
+        root.addView(welcome);
+
+        root.addView(
+                text(
+                        "منصة تجارة دقلة النور من بشني",
+                        17,
+                        BROWN
+                )
+        );
+
+        addSpace(root, 15);
+
+        Button buy =
+                button("🛒 شراء دقلة النور");
+
+        buy.setOnClickListener(
+                v -> showBuy()
+        );
+
+        root.addView(buy);
+
+        Button sell =
+                button("📦 بيع دقلة النور");
+
+        sell.setOnClickListener(
+                v -> showSell()
+        );
+
+        root.addView(sell);
+
+        Button orders =
+                button("📋 طلباتي");
+
+        orders.setOnClickListener(
+                v -> showOrders()
+        );
+
+        root.addView(orders);
+
+        Button contact =
+                button("📞 اتصل بنا");
+
+        contact.setOnClickListener(
+                v -> showContact()
+        );
+
+        root.addView(contact);
+
+        Button settings =
+                button("⚙ الإعدادات");
+
+        settings.setOnClickListener(
+                v -> showSettings()
+        );
+
+        root.addView(settings);
+
+        setContentView(root);
+    }
+
+    private void showBuy() {
+
+        currentPage = "buy";
+
+        LinearLayout root = baseLayout();
+
+        addHeader(root, "شراء دقلة النور");
+
+        addProduct(
+                root,
+                "دقلة النور من بشني",
+                "تمر فاخر • جودة عالية",
+                "السعر حسب الكمية"
+        );
+
+        addProduct(
+                root,
+                "دقلة نور ممتازة",
+                "اختيار المنتج مباشرة من المصدر",
+                "الدفع عند الاستلام"
+        );
+
+        Button back =
+                button("← العودة");
+
+        back.setOnClickListener(
+                v -> showHome()
+        );
+
+        root.addView(back);
+
+        setContentView(root);
+    }
+
+    private void addProduct(
+            LinearLayout root,
+            String title,
+            String description,
+            String price) {
+
+        LinearLayout card =
+                new LinearLayout(this);
+
+        card.setOrientation(
+                LinearLayout.VERTICAL
+        );
+
+        card.setPadding(
+                20,
+                20,
+                20,
+                20
+        );
+
+        card.setBackground(
+                bg(Color.WHITE, 30)
+        );
+
+        TextView t =
+                text(
+                        title,
+                        21,
+                        GREEN
+                );
+
+        t.setTypeface(
+                Typeface.DEFAULT,
+                Typeface.BOLD
+        );
+
+        card.addView(t);
+
+        card.addView(
+                text(
+                        description,
+                        16,
+                        BROWN
+                )
+        );
+
+        card.addView(
+                text(
+                        price,
+                        17,
+                        GOLD
+                )
+        );
+
+        Button details =
+                button("عرض التفاصيل");
+
+        details.setOnClickListener(
+                v -> showOfferDetails()
+        );
+
+        card.addView(details);
+
+        LinearLayout.LayoutParams lp =
+                new LinearLayout.LayoutParams(
+                        -1,
+                        -2
+                );
+
+        lp.setMargins(
+                10,
+                10,
+                10,
+                20
+        );
+
+        root.addView(
+                card,
+                lp
         );
     }
 
-    content.addView(
-            badges
-    );
+    private void showOfferDetails() {
 
-    // الشعار
-    TextView slogan =
-            text(
-                    "Achetez • Vendez • Échangez",
-                    16,
-                    WHITE
-            );
+        currentPage = "details";
 
-    slogan.setShadowLayer(
-            5,
-            0,
-            2,
-            Color.BLACK
-    );
+        LinearLayout root = baseLayout();
 
-    content.addView(
-            slogan,
-            new LinearLayout.LayoutParams(
-                    -1,
-                    40
-            )
-    );
+        addHeader(
+                root,
+                "تفاصيل العرض"
+        );
 
-    addSpace(
-            content,
-            12
-    );
+        root.addView(
+                text(
+                        "دقلة النور من بشني",
+                        25,
+                        GREEN
+                )
+        );
 
-    // زر ابدأ الآن
-    Button startButton =
-            button(
-                    "ابدأ الآن"
-            );
+        root.addView(
+                text(
+                        "تمر فاخر من واحات بشني – الفوار – قبلي",
+                        17,
+                        BROWN
+                )
+        );
 
-    startButton.setTextSize(
-            19
-    );
+        root.addView(
+                text(
+                        "تجارة مباشرة • جودة • ثقة",
+                        17,
+                        GOLD
+                )
+        );
 
-    startButton.setTypeface(
-            Typeface.DEFAULT,
-            Typeface.BOLD
-    );
+        Button call =
+                button(
+                        "📞 الاتصال بالبائع"
+                );
 
-    startButton.setBackground(
-            bg(
-                    GREEN,
-                    55
-            )
-    );
+        call.setOnClickListener(
+                v -> callPhone()
+        );
 
-    startButton.setOnClickListener(
-            v -> showHome()
-    );
+        root.addView(call);
 
-    LinearLayout.LayoutParams startLp =
-            new LinearLayout.LayoutParams(
-                    270,
-                    60
-            );
+        Button order =
+                button(
+                        "🛒 طلب المنتج"
+                );
 
-    startLp.gravity =
-            Gravity.CENTER_HORIZONTAL;
+        order.setOnClickListener(
+                v -> Toast.makeText(
+                        this,
+                        "تم تسجيل طلبك",
+                        Toast.LENGTH_SHORT
+                ).show()
+        );
 
-    content.addView(
-            startButton,
-            startLp
-    );
+        root.addView(order);
 
-    // اللغات
-    LinearLayout languages =
-            new LinearLayout(this);
+        Button back =
+                button("← العودة");
 
-    languages.setGravity(
-            Gravity.CENTER
-    );
+        back.setOnClickListener(
+                v -> showBuy()
+        );
 
-    languages.setPadding(
-            0,
-            10,
-            0,
-            0
-    );
+        root.addView(back);
 
-    Button ar =
-            button(
-                    "العربية"
-            );
+        setContentView(root);
+    }
 
-    Button fr =
-            button(
-                    "Français"
-            );
+    private void showSell() {
 
-    Button en =
-            button(
-                    "English"
-            );
+        currentPage = "sell";
 
-    ar.setOnClickListener(
-            v -> {
-                language = "ar";
-                showSplash();
-            }
-    );
+        LinearLayout root = baseLayout();
 
-    fr.setOnClickListener(
-            v -> {
-                language = "fr";
-                showSplash();
-            }
-    );
+        addHeader(
+                root,
+                "بيع دقلة النور"
+        );
 
-    en.setOnClickListener(
-            v -> {
-                language = "en";
-                showSplash();
-            }
-    );
+        EditText quantity =
+                new EditText(this);
 
-    languages.addView(
-            ar,
-            new LinearLayout.LayoutParams(
-                    100,
-                    46
-            )
-    );
+        quantity.setHint(
+                "الكمية بالكيلوغرام"
+        );
 
-    languages.addView(
-            fr,
-            new LinearLayout.LayoutParams(
-                    100,
-                    46
-            )
-    );
+        quantity.setInputType(
+                android.text.InputType.TYPE_CLASS_NUMBER
+        );
 
-    languages.addView(
-            en,
-            new LinearLayout.LayoutParams(
-                    100,
-                    46
-            )
-    );
+        root.addView(quantity);
 
-    content.addView(
-            languages
-    );
+        EditText price =
+                new EditText(this);
 
-    setContentView(
-            root
-    );
+        price.setHint(
+                "السعر للكيلوغرام"
+        );
+
+        price.setInputType(
+                android.text.InputType.TYPE_CLASS_NUMBER |
+                android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL
+        );
+
+        root.addView(price);
+
+        Button photo =
+                button("📷 إضافة صورة");
+
+        photo.setOnClickListener(
+                v -> chooseImage()
+        );
+
+        root.addView(photo);
+
+        Button publish =
+                button("نشر العرض");
+
+        publish.setOnClickListener(
+                v -> Toast.makeText(
+                        this,
+                        "تم نشر العرض بنجاح",
+                        Toast.LENGTH_LONG
+                ).show()
+        );
+
+        root.addView(publish);
+
+        Button back =
+                button("← العودة");
+
+        back.setOnClickListener(
+                v -> showHome()
+        );
+
+        root.addView(back);
+
+        setContentView(root);
+    }
+
+    private void showOrders() {
+
+        currentPage = "orders";
+
+        LinearLayout root = baseLayout();
+
+        addHeader(root, "طلباتي");
+
+        root.addView(
+                text(
+                        "لا توجد طلبات حالياً",
+                        20,
+                        BROWN
+                )
+        );
+
+        Button back =
+                button("← العودة");
+
+        back.setOnClickListener(
+                v -> showHome()
+        );
+
+        root.addView(back);
+
+        setContentView(root);
+    }
+
+    private void showContact() {
+
+        currentPage = "contact";
+
+        LinearLayout root = baseLayout();
+
+        addHeader(root, "اتصل بنا");
+
+        root.addView(
+                text(
+                        "DATRIDHA",
+                        30,
+                        GOLD
+                )
+        );
+
+        root.addView(
+                text(
+                        "دقلة النور من بشني",
+                        21,
+                        GREEN
+                )
+        );
+
+        root.addView(
+                text(
+                        "للاستفسار والطلبات",
+                        17,
+                        BROWN
+                )
+        );
+
+        Button phone =
+                button(
+                        "📞 +216 51022448"
+                );
+
+        phone.setOnClickListener(
+                v -> callPhone()
+        );
+
+        root.addView(phone);
+
+        Button email =
+                button(
+                        "✉ ridhatouil1992@gmail.com"
+                );
+
+        email.setOnClickListener(
+                v -> sendEmail()
+        );
+
+        root.addView(email);
+
+        Button back =
+                button("← العودة");
+
+        back.setOnClickListener(
+                v -> showHome()
+        );
+
+        root.addView(back);
+
+        setContentView(root);
+    }
+
+    private void showSettings() {
+
+        currentPage = "settings";
+
+        LinearLayout root = baseLayout();
+
+        addHeader(
+                root,
+                "الإعدادات"
+        );
+
+        root.addView(
+                text(
+                        "اللغة",
+                        20,
+                        GREEN
+                )
+        );
+
+        Button ar =
+                button("العربية");
+
+        Button fr =
+                button("Français");
+
+        Button en =
+                button("English");
+
+        ar.setOnClickListener(v -> {
+            language = "ar";
+            showSettings();
+        });
+
+        fr.setOnClickListener(v -> {
+            language = "fr";
+            showSettings();
+        });
+
+        en.setOnClickListener(v -> {
+            language = "en";
+            showSettings();
+        });
+
+        root.addView(ar);
+        root.addView(fr);
+        root.addView(en);
+
+        Button back =
+                button("← العودة");
+
+        back.setOnClickListener(
+                v -> showHome()
+        );
+
+        root.addView(back);
+
+        setContentView(root);
+    }
+
+    private void addHeader(
+            LinearLayout root,
+            String title) {
+
+        TextView header =
+                text(
+                        title,
+                        25,
+                        WHITE
+                );
+
+        header.setTypeface(
+                Typeface.DEFAULT,
+                Typeface.BOLD
+        );
+
+        header.setBackground(
+                bg(GREEN, 35)
+        );
+
+        header.setPadding(
+                10,
+                18,
+                10,
+                18
+        );
+
+        LinearLayout.LayoutParams lp =
+                new LinearLayout.LayoutParams(
+                        -1,
+                        -2
+                );
+
+        lp.setMargins(
+                0,
+                0,
+                0,
+                20
+        );
+
+        root.addView(
+                header,
+                lp
+        );
+    }
+
+    private LinearLayout baseLayout() {
+
+        ScrollView scroll =
+                new ScrollView(this);
+
+        LinearLayout content =
+                new LinearLayout(this);
+
+        content.setOrientation(
+                LinearLayout.VERTICAL
+        );
+
+        content.setPadding(
+                20,
+                20,
+                20,
+                30
+        );
+
+        content.setBackgroundColor(
+                CREAM
+        );
+
+        scroll.addView(content);
+
+        setContentView(scroll);
+
+        return content;
+    }
+
+    private void addSpace(
+            LinearLayout root,
+            int height) {
+
+        Space s =
+                new Space(this);
+
+        root.addView(
+                s,
+                new LinearLayout.LayoutParams(
+                        1,
+                        height
+                )
+        );
+    }
+
+    private void chooseImage() {
+
+        Intent intent =
+                new Intent(
+                        Intent.ACTION_PICK,
+                        android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+                );
+
+        startActivityForResult(
+                intent,
+                100
+        );
+    }
+
+    private void callPhone() {
+
+        Intent intent =
+                new Intent(
+                        Intent.ACTION_DIAL,
+                        Uri.parse(
+                                "tel:+21651022448"
+                        )
+                );
+
+        startActivity(intent);
+    }
+
+    private void sendEmail() {
+
+        Intent intent =
+                new Intent(
+                        Intent.ACTION_SENDTO
+                );
+
+        intent.setData(
+                Uri.parse(
+                        "mailto:ridhatouil1992@gmail.com"
+                )
+        );
+
+        intent.putExtra(
+                Intent.EXTRA_SUBJECT,
+                "DATRIDHA"
+        );
+
+        startActivity(intent);
+    }
+
+    @Override
+    public void onBackPressed() {
+
+        if (currentPage.equals("splash")) {
+
+            super.onBackPressed();
+
+        } else if (
+                currentPage.equals("home")
+        ) {
+
+            showSplash();
+
+        } else {
+
+            showHome();
+        }
+    }
 }
