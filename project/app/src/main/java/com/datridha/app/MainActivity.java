@@ -11,6 +11,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
 import android.widget.*;
+import android.provider.MediaStore;
 
 public class MainActivity extends Activity {
 
@@ -42,8 +43,15 @@ public class MainActivity extends Activity {
     }
 
     // =========================================================
-    // الأدوات العامة
+    // أدوات عامة
     // =========================================================
+
+    private int dp(float value) {
+        return (int) (
+                value * getResources()
+                        .getDisplayMetrics().density + 0.5f
+        );
+    }
 
     private GradientDrawable roundedBackground(
             int color,
@@ -51,7 +59,7 @@ public class MainActivity extends Activity {
     ) {
         GradientDrawable drawable = new GradientDrawable();
         drawable.setColor(color);
-        drawable.setCornerRadius(radius);
+        drawable.setCornerRadius(dp(radius));
         return drawable;
     }
 
@@ -61,11 +69,14 @@ public class MainActivity extends Activity {
             int color
     ) {
         TextView text = new TextView(this);
+
         text.setText(value);
         text.setTextSize(size);
         text.setTextColor(color);
         text.setGravity(Gravity.CENTER);
-        text.setPadding(8, 8, 8, 8);
+        text.setIncludeFontPadding(true);
+        text.setPadding(dp(8), dp(6), dp(8), dp(6));
+
         return text;
     }
 
@@ -77,7 +88,7 @@ public class MainActivity extends Activity {
         button.setTextColor(WHITE);
         button.setAllCaps(false);
         button.setGravity(Gravity.CENTER);
-        button.setPadding(12, 4, 12, 4);
+        button.setPadding(dp(12), dp(4), dp(12), dp(4));
 
         button.setBackground(
                 roundedBackground(GREEN, 45)
@@ -96,7 +107,8 @@ public class MainActivity extends Activity {
                         LinearLayout.LayoutParams.WRAP_CONTENT
                 );
 
-        params.setMargins(0, 5, 0, 5);
+        params.setMargins(0, dp(5), 0, dp(5));
+
         root.addView(button, params);
     }
 
@@ -110,22 +122,42 @@ public class MainActivity extends Activity {
                 space,
                 new LinearLayout.LayoutParams(
                         1,
-                        height
+                        dp(height)
                 )
         );
     }
 
+    /*
+     * مهم:
+     * هذه الدالة تعرض ScrollView مرة واحدة فقط.
+     * لا تستدعِ setContentView(root) في نهاية الصفحات
+     * التي تستخدم baseLayout().
+     */
     private LinearLayout baseLayout() {
         ScrollView scroll = new ScrollView(this);
 
         scroll.setFillViewport(true);
+        scroll.setClipToPadding(false);
 
         LinearLayout content = new LinearLayout(this);
+
         content.setOrientation(LinearLayout.VERTICAL);
-        content.setPadding(20, 20, 20, 30);
+        content.setPadding(
+                dp(20),
+                dp(20),
+                dp(20),
+                dp(30)
+        );
+
         content.setBackgroundColor(CREAM);
 
-        scroll.addView(content);
+        scroll.addView(
+                content,
+                new ScrollView.LayoutParams(
+                        ScrollView.LayoutParams.MATCH_PARENT,
+                        ScrollView.LayoutParams.WRAP_CONTENT
+                )
+        );
 
         setContentView(scroll);
 
@@ -151,7 +183,12 @@ public class MainActivity extends Activity {
                 roundedBackground(GREEN, 35)
         );
 
-        header.setPadding(10, 18, 10, 18);
+        header.setPadding(
+                dp(10),
+                dp(18),
+                dp(10),
+                dp(18)
+        );
 
         LinearLayout.LayoutParams params =
                 new LinearLayout.LayoutParams(
@@ -159,7 +196,7 @@ public class MainActivity extends Activity {
                         LinearLayout.LayoutParams.WRAP_CONTENT
                 );
 
-        params.setMargins(0, 0, 0, 20);
+        params.setMargins(0, 0, 0, dp(20));
 
         root.addView(header, params);
     }
@@ -174,7 +211,6 @@ public class MainActivity extends Activity {
 
         Window window = getWindow();
 
-        // نبقي شريط التنقل السفلي ظاهرًا حتى لا تتداخل الأزرار معه.
         window.setStatusBarColor(Color.TRANSPARENT);
         window.setNavigationBarColor(GREEN);
 
@@ -186,7 +222,7 @@ public class MainActivity extends Activity {
         FrameLayout root = new FrameLayout(this);
         root.setBackgroundColor(CREAM);
 
-        // الخلفية الأصلية التي رفعها المستخدم.
+        // صورة الخلفية
         ImageView background = new ImageView(this);
 
         background.setImageResource(
@@ -205,7 +241,7 @@ public class MainActivity extends Activity {
                 )
         );
 
-        // لا نضيف شعارًا آخر لأن الصورة تحتوي على شعار DATRIDHA.
+        // العبارات الموجودة تحت شعار DATRIDHA
         LinearLayout phrases = new LinearLayout(this);
 
         phrases.setOrientation(
@@ -213,7 +249,15 @@ public class MainActivity extends Activity {
         );
 
         phrases.setGravity(Gravity.CENTER);
-        phrases.setPadding(12, 0, 12, 0);
+        phrases.setClipChildren(false);
+        phrases.setClipToPadding(false);
+
+        phrases.setPadding(
+                dp(12),
+                dp(4),
+                dp(12),
+                dp(4)
+        );
 
         TextView phrase1 = makeText(
                 "دڤلة نور تونسية أصيلة",
@@ -239,7 +283,7 @@ public class MainActivity extends Activity {
                 phrase1,
                 new LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.MATCH_PARENT,
-                        50
+                        LinearLayout.LayoutParams.WRAP_CONTENT
                 )
         );
 
@@ -263,13 +307,15 @@ public class MainActivity extends Activity {
                 Color.WHITE
         );
 
-        phrases.addView(
-                phrase2,
+        LinearLayout.LayoutParams phrase2Params =
                 new LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.MATCH_PARENT,
-                        42
-                )
-        );
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                );
+
+        phrase2Params.topMargin = dp(2);
+
+        phrases.addView(phrase2, phrase2Params);
 
         TextView phrase3 = makeText(
                 "بيع - شراء - تعامل",
@@ -289,13 +335,15 @@ public class MainActivity extends Activity {
                 Color.WHITE
         );
 
-        phrases.addView(
-                phrase3,
+        LinearLayout.LayoutParams phrase3Params =
                 new LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.MATCH_PARENT,
-                        40
-                )
-        );
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                );
+
+        phrase3Params.topMargin = dp(2);
+
+        phrases.addView(phrase3, phrase3Params);
 
         FrameLayout.LayoutParams phrasesParams =
                 new FrameLayout.LayoutParams(
@@ -308,7 +356,7 @@ public class MainActivity extends Activity {
 
         root.addView(phrases, phrasesParams);
 
-        // مجموعة الأزرار السفلية.
+        // مجموعة الأزرار السفلية
         LinearLayout bottomContent = new LinearLayout(this);
 
         bottomContent.setOrientation(
@@ -319,7 +367,12 @@ public class MainActivity extends Activity {
                 Gravity.CENTER_HORIZONTAL
         );
 
-        bottomContent.setPadding(16, 8, 16, 12);
+        bottomContent.setPadding(
+                dp(16),
+                dp(8),
+                dp(16),
+                dp(12)
+        );
 
         FrameLayout.LayoutParams bottomParams =
                 new FrameLayout.LayoutParams(
@@ -329,6 +382,9 @@ public class MainActivity extends Activity {
 
         bottomParams.gravity =
                 Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
+
+        // رفع مجموعة الأزرار قليلًا عن أسفل الشاشة
+        bottomParams.bottomMargin = dp(18);
 
         root.addView(bottomContent, bottomParams);
 
@@ -360,14 +416,19 @@ public class MainActivity extends Activity {
         LinearLayout.LayoutParams startParams =
                 new LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.MATCH_PARENT,
-                        56
+                        dp(56)
                 );
 
-        startParams.setMargins(20, 0, 20, 8);
+        startParams.setMargins(
+                dp(20),
+                0,
+                dp(20),
+                dp(8)
+        );
 
         bottomContent.addView(startButton, startParams);
 
-        // أزرار اللغات.
+        // أزرار اللغات
         LinearLayout languages = new LinearLayout(this);
 
         languages.setOrientation(
@@ -402,21 +463,27 @@ public class MainActivity extends Activity {
         languages.addView(
                 ar,
                 new LinearLayout.LayoutParams(
-                        0, 44, 1
+                        0,
+                        dp(44),
+                        1
                 )
         );
 
         languages.addView(
                 fr,
                 new LinearLayout.LayoutParams(
-                        0, 44, 1
+                        0,
+                        dp(44),
+                        1
                 )
         );
 
         languages.addView(
                 en,
                 new LinearLayout.LayoutParams(
-                        0, 44, 1
+                        0,
+                        dp(44),
+                        1
                 )
         );
 
@@ -424,7 +491,7 @@ public class MainActivity extends Activity {
 
         setContentView(root);
 
-        // وضع العبارات تحت اسم DATRIDHA الموجود في الصورة.
+        // وضع العبارات تحت الشعار
         root.post(() -> {
 
             int screenHeight = root.getHeight();
@@ -499,7 +566,7 @@ public class MainActivity extends Activity {
         settings.setOnClickListener(v -> showSettings());
         addButton(root, settings);
 
-        setContentView(root);
+        // لا نعيد استدعاء setContentView هنا.
     }
 
     // =========================================================
@@ -531,8 +598,6 @@ public class MainActivity extends Activity {
         Button back = makeButton("← العودة");
         back.setOnClickListener(v -> showHome());
         addButton(root, back);
-
-        setContentView(root);
     }
 
     private void addProduct(
@@ -541,14 +606,18 @@ public class MainActivity extends Activity {
             String description,
             String price
     ) {
-
         LinearLayout card = new LinearLayout(this);
 
         card.setOrientation(
                 LinearLayout.VERTICAL
         );
 
-        card.setPadding(20, 20, 20, 20);
+        card.setPadding(
+                dp(20),
+                dp(20),
+                dp(20),
+                dp(20)
+        );
 
         card.setBackground(
                 roundedBackground(WHITE, 30)
@@ -589,7 +658,12 @@ public class MainActivity extends Activity {
                         LinearLayout.LayoutParams.WRAP_CONTENT
                 );
 
-        params.setMargins(10, 10, 10, 20);
+        params.setMargins(
+                dp(10),
+                dp(10),
+                dp(10),
+                dp(20)
+        );
 
         root.addView(card, params);
     }
@@ -649,8 +723,6 @@ public class MainActivity extends Activity {
         Button back = makeButton("← العودة");
         back.setOnClickListener(v -> showBuy());
         addButton(root, back);
-
-        setContentView(root);
     }
 
     // =========================================================
@@ -666,7 +738,6 @@ public class MainActivity extends Activity {
         addHeader(root, "بيع دقلة النور");
 
         sellQuantity = new EditText(this);
-
         sellQuantity.setHint("الكمية بالكيلوغرام");
 
         sellQuantity.setInputType(
@@ -676,7 +747,6 @@ public class MainActivity extends Activity {
         root.addView(sellQuantity);
 
         sellPrice = new EditText(this);
-
         sellPrice.setHint("السعر للكيلوغرام");
 
         sellPrice.setInputType(
@@ -687,7 +757,6 @@ public class MainActivity extends Activity {
         root.addView(sellPrice);
 
         selectedImageView = new ImageView(this);
-
         selectedImageView.setVisibility(View.GONE);
 
         selectedImageView.setScaleType(
@@ -697,18 +766,20 @@ public class MainActivity extends Activity {
         LinearLayout.LayoutParams imageParams =
                 new LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.MATCH_PARENT,
-                        220
+                        dp(220)
                 );
 
-        imageParams.setMargins(0, 10, 0, 10);
+        imageParams.setMargins(
+                0,
+                dp(10),
+                0,
+                dp(10)
+        );
 
         root.addView(selectedImageView, imageParams);
 
         Button photo = makeButton("📷 إضافة صورة");
-
-        // المعرض لا يُفتح إلا عند الضغط على هذا الزر.
         photo.setOnClickListener(v -> chooseImage());
-
         addButton(root, photo);
 
         Button publish = makeButton("نشر العرض");
@@ -744,12 +815,10 @@ public class MainActivity extends Activity {
         Button back = makeButton("← العودة");
         back.setOnClickListener(v -> showHome());
         addButton(root, back);
-
-        setContentView(root);
     }
 
     // =========================================================
-    // استقبال الصورة المختارة من المعرض
+    // اختيار صورة من المعرض
     // =========================================================
 
     @Override
@@ -792,15 +861,25 @@ public class MainActivity extends Activity {
 
     private void chooseImage() {
 
-        Intent intent = new Intent(
-                Intent.ACTION_PICK,
-                android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-        );
+        try {
+            Intent intent = new Intent(
+                    Intent.ACTION_PICK,
+                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+            );
 
-        startActivityForResult(
-                intent,
-                PICK_IMAGE_REQUEST
-        );
+            startActivityForResult(
+                    intent,
+                    PICK_IMAGE_REQUEST
+            );
+
+        } catch (Exception e) {
+
+            Toast.makeText(
+                    this,
+                    "تعذر فتح معرض الصور",
+                    Toast.LENGTH_SHORT
+            ).show();
+        }
     }
 
     // =========================================================
@@ -826,8 +905,6 @@ public class MainActivity extends Activity {
         Button back = makeButton("← العودة");
         back.setOnClickListener(v -> showHome());
         addButton(root, back);
-
-        setContentView(root);
     }
 
     // =========================================================
@@ -876,8 +953,6 @@ public class MainActivity extends Activity {
         Button back = makeButton("← العودة");
         back.setOnClickListener(v -> showHome());
         addButton(root, back);
-
-        setContentView(root);
     }
 
     // =========================================================
@@ -922,40 +997,62 @@ public class MainActivity extends Activity {
         Button back = makeButton("← العودة");
         back.setOnClickListener(v -> showHome());
         addButton(root, back);
-
-        setContentView(root);
     }
 
     // =========================================================
-    // الاتصال الهاتفي والبريد الإلكتروني
+    // الاتصال الهاتفي
     // =========================================================
 
     private void callPhone() {
 
-        Intent intent = new Intent(
-                Intent.ACTION_DIAL,
-                Uri.parse("tel:+21651022448")
-        );
+        try {
+            Intent intent = new Intent(
+                    Intent.ACTION_DIAL,
+                    Uri.parse("tel:+21651022448")
+            );
 
-        startActivity(intent);
+            startActivity(intent);
+
+        } catch (Exception e) {
+
+            Toast.makeText(
+                    this,
+                    "تعذر فتح تطبيق الاتصال",
+                    Toast.LENGTH_SHORT
+            ).show();
+        }
     }
+
+    // =========================================================
+    // البريد الإلكتروني
+    // =========================================================
 
     private void sendEmail() {
 
-        Intent intent = new Intent(
-                Intent.ACTION_SENDTO
-        );
+        try {
+            Intent intent = new Intent(
+                    Intent.ACTION_SENDTO
+            );
 
-        intent.setData(
-                Uri.parse("mailto:ridhatouil1992@gmail.com")
-        );
+            intent.setData(
+                    Uri.parse("mailto:ridhatouil1992@gmail.com")
+            );
 
-        intent.putExtra(
-                Intent.EXTRA_SUBJECT,
-                "DATRIDHA"
-        );
+            intent.putExtra(
+                    Intent.EXTRA_SUBJECT,
+                    "DATRIDHA"
+            );
 
-        startActivity(intent);
+            startActivity(intent);
+
+        } catch (Exception e) {
+
+            Toast.makeText(
+                    this,
+                    "لا يوجد تطبيق بريد إلكتروني متاح",
+                    Toast.LENGTH_SHORT
+            ).show();
+        }
     }
 
     // =========================================================
