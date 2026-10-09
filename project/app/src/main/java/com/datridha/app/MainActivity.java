@@ -93,7 +93,7 @@ public class MainActivity extends Activity {
          * لا نضيف شعاراً أو اسماً آخر فوقها.
          */
         ImageView background = new ImageView(this);
-        background.setImageResource(R.drawable.splash_oasis);
+        background.setImageResource(R.drawable.image_2bd7123b);
         background.setScaleType(ImageView.ScaleType.CENTER_CROP);
 
         root.addView(
