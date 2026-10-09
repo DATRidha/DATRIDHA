@@ -1,0 +1,1 @@
+DATRIDHA splash image resources
