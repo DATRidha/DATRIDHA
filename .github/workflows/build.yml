@@ -80,7 +80,26 @@ jobs:
           cp "$SOURCE" "$DEST"
 
           echo "MainActivity installed successfully."
+          
+      - name: Install splash background
+        run: |
+          set -e
 
+          SOURCE="project/project/app/src/main/res/drawable/image_2bd7123b.jpg"
+          DEST="$PROJECT_DIR/app/src/main/res/drawable/image_2bd7123b.jpg"
+
+          if [ ! -f "$SOURCE" ]; then
+            echo "ERROR: Splash image not found: $SOURCE"
+            find project -type f -name "image_2bd7123b.jpg"
+            exit 1
+          fi
+
+          mkdir -p "$(dirname "$DEST")"
+          cp "$SOURCE" "$DEST"
+
+          echo "Splash image installed:"
+          ls -lh "$DEST"
+          
       - name: Set application icon
         run: |
           set -e
