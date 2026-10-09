@@ -88,8 +88,9 @@ public class MainActivity extends Activity {
         FrameLayout root = new FrameLayout(this);
 
         /*
-         * الخلفية فقط.
-         * ليست أزراراً وليست واجهة كاملة.
+         * الخلفية الأصلية.
+         * الصورة تحتوي مسبقاً على الشعار واسم DATRIDHA.
+         * لا نضيف شعاراً أو اسماً آخر فوقها.
          */
         ImageView background = new ImageView(this);
         background.setImageResource(R.drawable.splash_oasis);
@@ -104,163 +105,119 @@ public class MainActivity extends Activity {
         );
 
         /*
-         * طبقة شفافة لتحسين وضوح الكتابة.
+         * العبارات الجديدة أسفل اسم DATRIDHA الموجود بالصورة.
+         * لا نضيف طبقة تعتيم فوق الخلفية.
          */
-        View shade = new View(this);
+        LinearLayout phrases = new LinearLayout(this);
+        phrases.setOrientation(LinearLayout.VERTICAL);
+        phrases.setGravity(Gravity.CENTER);
+        phrases.setPadding(12, 0, 12, 0);
 
-        GradientDrawable shadeDrawable =
-                new GradientDrawable(
-                        GradientDrawable.Orientation.TOP_BOTTOM,
-                        new int[]{
-                                0x18000000,
-                                0x45000000,
-                                0x88000000
-                        }
-                );
-
-        shade.setBackground(shadeDrawable);
-
-        root.addView(
-                shade,
-                new FrameLayout.LayoutParams(
-                        FrameLayout.LayoutParams.MATCH_PARENT,
-                        FrameLayout.LayoutParams.MATCH_PARENT
-                )
+        TextView phrase1 = makeText(
+                "دڤلة نور تونسية أصيلة",
+                27,
+                Color.WHITE
         );
 
-        /*
-         * المحتوى الحقيقي.
-         */
-        LinearLayout content = new LinearLayout(this);
-        content.setOrientation(LinearLayout.VERTICAL);
-        content.setGravity(Gravity.CENTER_HORIZONTAL);
-        content.setPadding(25, 45, 25, 25);
-
-        FrameLayout.LayoutParams contentParams =
-                new FrameLayout.LayoutParams(
-                        FrameLayout.LayoutParams.MATCH_PARENT,
-                        FrameLayout.LayoutParams.MATCH_PARENT
-                );
-
-        contentParams.gravity = Gravity.CENTER;
-
-        root.addView(content, contentParams);
-
-        /*
-         * الشعار
-         */
-        ImageView logo = new ImageView(this);
-        logo.setImageResource(R.drawable.app_icon);
-        logo.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-
-        LinearLayout.LayoutParams logoParams =
-                new LinearLayout.LayoutParams(135, 135);
-
-        logoParams.gravity = Gravity.CENTER_HORIZONTAL;
-
-        content.addView(logo, logoParams);
-
-        /*
-         * اسم التطبيق
-         */
-        TextView brand =
-                makeText("DATRIDHA", 32, GOLD);
-
-        brand.setTypeface(
-                Typeface.create(Typeface.SERIF, Typeface.BOLD)
+        phrase1.setTypeface(
+                Typeface.create("serif", Typeface.BOLD_ITALIC)
         );
 
-        brand.setLetterSpacing(0.12f);
-        brand.setShadowLayer(7, 0, 3, Color.BLACK);
+        phrase1.setShadowLayer(5, 0, 2, Color.BLACK);
 
-        content.addView(
-                brand,
-                new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        60
-                )
-        );
-
-        /*
-         * العربية
-         */
-        TextView arabic =
-                makeText(
-                        "دَقْلَةُ النُّور مِنْ بَشْنِي",
-                        21,
-                        WHITE
-                );
-
-        arabic.setTypeface(
-                Typeface.DEFAULT,
-                Typeface.BOLD
-        );
-
-        arabic.setShadowLayer(6, 0, 2, Color.BLACK);
-
-        content.addView(
-                arabic,
+        phrases.addView(
+                phrase1,
                 new LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.MATCH_PARENT,
                         50
                 )
         );
 
-        /*
-         * الفرنسية
-         */
-        TextView french =
-                makeText(
-                        "Deglet Nour de Bechni",
-                        17,
-                        WHITE
-                );
-
-        french.setTypeface(
-                Typeface.create(Typeface.SERIF, Typeface.ITALIC)
+        TextView phrase2 = makeText(
+                "دڤلة ڤبلي",
+                23,
+                Color.WHITE
         );
 
-        french.setShadowLayer(5, 0, 2, Color.BLACK);
+        phrase2.setTypeface(
+                Typeface.create("serif", Typeface.BOLD_ITALIC)
+        );
 
-        content.addView(
-                french,
+        phrase2.setShadowLayer(5, 0, 2, Color.BLACK);
+
+        phrases.addView(
+                phrase2,
                 new LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.MATCH_PARENT,
-                        45
+                        42
                 )
         );
 
-        /*
-         * الشعار
-         */
-        TextView slogan =
-                makeText(
-                        "Achetez • Vendez • Échangez",
-                        16,
-                        WHITE
-                );
+        TextView phrase3 = makeText(
+                "بيع - شراء - تعامل",
+                18,
+                Color.WHITE
+        );
 
-        slogan.setShadowLayer(5, 0, 2, Color.BLACK);
+        phrase3.setTypeface(
+                Typeface.create("sans-serif", Typeface.NORMAL)
+        );
 
-        content.addView(
-                slogan,
+        phrase3.setShadowLayer(4, 0, 2, Color.BLACK);
+
+        phrases.addView(
+                phrase3,
                 new LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.MATCH_PARENT,
-                        45
+                        40
                 )
         );
 
-        addSpace(content, 18);
+        FrameLayout.LayoutParams phrasesParams =
+                new FrameLayout.LayoutParams(
+                        FrameLayout.LayoutParams.MATCH_PARENT,
+                        FrameLayout.LayoutParams.WRAP_CONTENT
+                );
+
+        phrasesParams.gravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
 
         /*
-         * زر ابدأ الحقيقي.
-         *
-         * مهم:
-         * لا يوجد هنا أي رابط خارجي.
-         * الزر يستدعي showHome() مباشرة داخل التطبيق.
+         * نحدد موضع العبارات اعتماداً على ارتفاع الشاشة.
          */
-        Button startButton =
-                makeButton("ابدأ الآن");
+        root.addView(phrases, phrasesParams);
+
+        /*
+         * الأزرار في أسفل الشاشة حتى لا تتداخل مع العبارات.
+         */
+        LinearLayout bottomContent = new LinearLayout(this);
+        bottomContent.setOrientation(LinearLayout.VERTICAL);
+        bottomContent.setGravity(Gravity.CENTER_HORIZONTAL);
+        bottomContent.setPadding(16, 8, 16, 20);
+
+        FrameLayout.LayoutParams bottomParams =
+                new FrameLayout.LayoutParams(
+                        FrameLayout.LayoutParams.MATCH_PARENT,
+                        FrameLayout.LayoutParams.WRAP_CONTENT
+                );
+
+        bottomParams.gravity = Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
+
+        root.addView(bottomContent, bottomParams);
+
+        /*
+         * زر البدء.
+         */
+        String startTitle;
+
+        if ("fr".equals(language)) {
+            startTitle = "Commencer maintenant";
+        } else if ("en".equals(language)) {
+            startTitle = "Start now";
+        } else {
+            startTitle = "ابدأ الآن";
+        }
+
+        Button startButton = makeButton(startTitle);
 
         startButton.setTextSize(19);
         startButton.setTypeface(
@@ -273,29 +230,24 @@ public class MainActivity extends Activity {
         );
 
         startButton.setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        currentPage = "home";
-                        showHome();
-                    }
+                v -> {
+                    currentPage = "home";
+                    showHome();
                 }
         );
 
         LinearLayout.LayoutParams startParams =
                 new LinearLayout.LayoutParams(
-                        270,
-                        60
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        58
                 );
 
-        startParams.gravity = Gravity.CENTER_HORIZONTAL;
+        startParams.setMargins(20, 0, 20, 8);
 
-        content.addView(startButton, startParams);
-
-        addSpace(content, 12);
+        bottomContent.addView(startButton, startParams);
 
         /*
-         * اللغات
+         * أزرار اللغات.
          */
         LinearLayout languages = new LinearLayout(this);
         languages.setOrientation(LinearLayout.HORIZONTAL);
@@ -304,6 +256,10 @@ public class MainActivity extends Activity {
         Button ar = makeButton("العربية");
         Button fr = makeButton("Français");
         Button en = makeButton("English");
+
+        ar.setTextSize(14);
+        fr.setTextSize(14);
+        en.setTextSize(14);
 
         ar.setOnClickListener(
                 v -> {
@@ -326,24 +282,50 @@ public class MainActivity extends Activity {
                 }
         );
 
-        languages.addView(
-                ar,
-                new LinearLayout.LayoutParams(100, 48)
-        );
+        LinearLayout.LayoutParams languageButtonParams =
+                new LinearLayout.LayoutParams(
+                        0,
+                        46,
+                        1
+                );
 
-        languages.addView(
-                fr,
-                new LinearLayout.LayoutParams(100, 48)
-        );
+        languageButtonParams.setMargins(4, 0, 4, 0);
 
-        languages.addView(
-                en,
-                new LinearLayout.LayoutParams(100, 48)
-        );
+        languages.addView(ar, new LinearLayout.LayoutParams(
+                languageButtonParams.width,
+                languageButtonParams.height,
+                languageButtonParams.weight
+        ));
 
-        content.addView(languages);
+        languages.addView(fr, new LinearLayout.LayoutParams(
+                languageButtonParams.width,
+                languageButtonParams.height,
+                languageButtonParams.weight
+        ));
+
+        languages.addView(en, new LinearLayout.LayoutParams(
+                languageButtonParams.width,
+                languageButtonParams.height,
+                languageButtonParams.weight
+        ));
+
+        bottomContent.addView(languages);
 
         setContentView(root);
+
+        /*
+         * نضبط مكان العبارات بعد قياس الشاشة.
+         */
+        root.post(() -> {
+            int screenHeight = root.getHeight();
+
+            FrameLayout.LayoutParams params =
+                    (FrameLayout.LayoutParams) phrases.getLayoutParams();
+
+            params.topMargin = (int) (screenHeight * 0.34f);
+
+            phrases.setLayoutParams(params);
+        });
     }
 
     /*
