@@ -8,7 +8,6 @@ jobs:
     runs-on: ubuntu-24.04
 
     steps:
-
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -50,8 +49,6 @@ jobs:
 
           unzip -q DATRIDHA_UI_ASSETS_READY.zip -d /tmp/datridha_assets
 
-          find /tmp/datridha_assets -type f -maxdepth 2 -print
-
           cp /tmp/datridha_assets/splash_bg.png \
             "$PROJECT_DIR/app/src/main/res/drawable/splash_oasis.png"
 
@@ -77,7 +74,7 @@ jobs:
 
           echo "MainActivity installed successfully."
 
-            - name: Set application icon
+      - name: Set application icon
         run: |
           set -e
 
@@ -104,6 +101,7 @@ jobs:
 
           echo "Exact launcher icon file:"
           ls -lh "$PROJECT_DIR/app/src/main/res/drawable/app_icon.png"
+
       - name: Set up Java 17
         uses: actions/setup-java@v5
         with:
