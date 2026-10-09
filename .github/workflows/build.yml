@@ -46,6 +46,7 @@ jobs:
           set -e
 
           mkdir -p "$PROJECT_DIR/app/src/main/res/drawable"
+          mkdir -p /tmp/datridha_assets
 
           unzip -q DATRIDHA_UI_ASSETS_READY.zip -d /tmp/datridha_assets
 
@@ -67,10 +68,16 @@ jobs:
         run: |
           set -e
 
-          mkdir -p "$PROJECT_DIR/app/src/main/java/com/datridha/app"
+          SOURCE="project/app/src/main/java/com/datridha/app/MainActivity.java"
+          DEST="$PROJECT_DIR/app/src/main/java/com/datridha/app/MainActivity.java"
 
-          cp project/app/src/main/java/com/datridha/app/MainActivity.java \
-             "$PROJECT_DIR/app/src/main/java/com/datridha/app/MainActivity.java"
+          if [ ! -f "$SOURCE" ]; then
+            echo "ERROR: MainActivity.java source file not found: $SOURCE"
+            exit 1
+          fi
+
+          mkdir -p "$(dirname "$DEST")"
+          cp "$SOURCE" "$DEST"
 
           echo "MainActivity installed successfully."
 
@@ -87,20 +94,52 @@ jobs:
             exit 1
           fi
 
-          echo "Manifest found:"
-          echo "$MANIFEST"
+          ICON="$PROJECT_DIR/app/src/main/res/drawable/app_icon.png"
 
-          sed -i -E \
-            's|android:icon="@[^"]*"|android:icon="@drawable/app_icon"|g; s|android:roundIcon="@[^"]*"|android:roundIcon="@drawable/app_icon"|g' \
-            "$MANIFEST"
+          if [ ! -s "$ICON" ]; then
+            echo "ERROR: App icon file is missing or empty: $ICON"
+            exit 1
+          fi
 
-          test -s "$PROJECT_DIR/app/src/main/res/drawable/app_icon.png"
+          python3 - "$MANIFEST" <<'PY'
+          import sys
+          import xml.etree.ElementTree as ET
 
-          echo "Launcher icon configured:"
-          grep -nE 'android:(icon|roundIcon)=' "$MANIFEST"
+          manifest_path = sys.argv[1]
+          android_ns = "http://schemas.android.com/apk/res/android"
 
-          echo "Exact launcher icon file:"
-          ls -lh "$PROJECT_DIR/app/src/main/res/drawable/app_icon.png"
+          ET.register_namespace("android", android_ns)
+
+          tree = ET.parse(manifest_path)
+          root = tree.getroot()
+
+          application = root.find("application")
+
+          if application is None:
+              raise SystemExit("ERROR: <application> tag not found")
+
+          icon_key = "{" + android_ns + "}icon"
+          round_icon_key = "{" + android_ns + "}roundIcon"
+
+          application.set(icon_key, "@drawable/app_icon")
+          application.set(round_icon_key, "@drawable/app_icon")
+
+          tree.write(
+              manifest_path,
+              encoding="utf-8",
+              xml_declaration=True
+          )
+
+          print("Launcher icon configured successfully.")
+          print("android:icon = @drawable/app_icon")
+          print("android:roundIcon = @drawable/app_icon")
+          PY
+
+          echo "Manifest updated:"
+          grep -n "app_icon" "$MANIFEST"
+
+          echo "Icon file verified:"
+          ls -lh "$ICON"
 
       - name: Set up Java 17
         uses: actions/setup-java@v5
@@ -118,6 +157,22 @@ jobs:
           set -e
 
           gradle -p "$PROJECT_DIR" clean assembleDebug
+
+      - name: Verify APK
+        run: |
+          set -e
+
+          APK=$(find build_project -type f \
+            -path "*/app/build/outputs/apk/debug/app-debug.apk" \
+            -print -quit)
+
+          if [ -z "$APK" ]; then
+            echo "ERROR: APK was not generated"
+            exit 1
+          fi
+
+          echo "APK generated successfully:"
+          ls -lh "$APK"
 
       - name: Upload final APK
         uses: actions/upload-artifact@v4
