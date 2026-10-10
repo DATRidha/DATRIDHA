@@ -294,7 +294,7 @@ public class MainActivity extends Activity {
         logo.setScaleType(ImageView.ScaleType.FIT_CENTER);
 logo.setAdjustViewBounds(true);
 logo.setPadding(dp(4), 0, dp(4), 0);
-root.addView(logo, lp(-1, dp(360)));
+root.addView(logo, lp(-1, dp(420)));
         TextView name = text("DATRIDHA", 34, GOLD, true);
         name.setGravity(Gravity.CENTER);
         root.addView(name, margin(-1, dp(55), 12, 12, 12, 0));
@@ -376,7 +376,7 @@ root.addView(logo, lp(-1, dp(360)));
                 "Du producteur au grossiste, qualité tunisienne et authenticité des oasis du Sud.",
                 "From producer to wholesaler, Tunisian quality from the southern oases."));
 
-        addPhoto(R.drawable.image_69792f84, "Deglet Nour packaging", 190);
+        addPhoto(R.drawable.image_69792f84, "Deglet Nour packaging", 280);
         addSection(tr("سوق التمور بالجملة", "Marché de dattes en gros", "Wholesale Dates Market"));
         addParagraph(tr(
                 "اكتشف عروض التمور، أضف إعلانك، وتواصل مباشرة مع البائع.",
