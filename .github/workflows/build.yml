@@ -160,13 +160,11 @@ jobs:
           echo "Icon file verified:"
           ls -lh "$ICON"
           
-      - name: Copy additional date images
+      - name: Find and copy additional date images
         run: |
           set -e
 
-          SOURCE="DATRIDHA/project/app/src/main/res/drawable"
           DEST="$PROJECT_DIR/app/src/main/res/drawable"
-
           mkdir -p "$DEST"
 
           for FILE in \
@@ -175,13 +173,26 @@ jobs:
             dates_basket_1.jpg \
             dates_basket_2.jpg
           do
-            if [ ! -f "$SOURCE/$FILE" ]; then
-              echo "ERROR: Missing source image: $SOURCE/$FILE"
+            echo "Searching for $FILE"
+
+            SOURCE=$(find . -type f -name "$FILE" \
+              -not -path "./build_project/*" \
+              -print -quit)
+
+            if [ -z "$SOURCE" ]; then
+              echo "ERROR: Image not found in repository: $FILE"
+              echo "Available image files:"
+              find . -type f \( \
+                -iname "*.jpg" -o \
+                -iname "*.jpeg" -o \
+                -iname "*.png" -o \
+                -iname "*.webp" \
+              \) | head -80
               exit 1
             fi
 
-            cp "$SOURCE/$FILE" "$DEST/$FILE"
-            echo "Copied: $FILE"
+            cp "$SOURCE" "$DEST/$FILE"
+            echo "Copied $SOURCE to $DEST/$FILE"
           done
 
           echo "All four date images copied successfully."
