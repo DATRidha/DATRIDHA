@@ -159,7 +159,33 @@ jobs:
 
           echo "Icon file verified:"
           ls -lh "$ICON"
+          
+      - name: Copy additional date images
+        run: |
+          set -e
 
+          SOURCE="DATRIDHA/project/app/src/main/res/drawable"
+          DEST="$PROJECT_DIR/app/src/main/res/drawable"
+
+          mkdir -p "$DEST"
+
+          for FILE in \
+            image_69792f84.jpg \
+            image_562aeaad.jpg \
+            dates_basket_1.jpg \
+            dates_basket_2.jpg
+          do
+            if [ ! -f "$SOURCE/$FILE" ]; then
+              echo "ERROR: Missing source image: $SOURCE/$FILE"
+              exit 1
+            fi
+
+            cp "$SOURCE/$FILE" "$DEST/$FILE"
+            echo "Copied: $FILE"
+          done
+
+          echo "All four date images copied successfully."
+          
       - name: Set up Java 17
         uses: actions/setup-java@v5
         with:
