@@ -256,8 +256,8 @@ public class MainActivity extends Activity {
         logo.setImageResource(R.drawable.image_2bd7123b);
         logo.setScaleType(ImageView.ScaleType.FIT_CENTER);
 logo.setAdjustViewBounds(true);
-root.addView(logo, lp(-1, dp(280)));
-
+logo.setPadding(dp(4), 0, dp(4), 0);
+root.addView(logo, lp(-1, dp(360)));
         TextView name = text("DATRIDHA", 34, GOLD, true);
         name.setGravity(Gravity.CENTER);
         root.addView(name, margin(-1, dp(55), 12, 12, 12, 0));
