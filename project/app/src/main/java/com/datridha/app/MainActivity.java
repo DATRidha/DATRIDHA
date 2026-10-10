@@ -3,1088 +3,786 @@ package com.datridha.app;
 import android.app.Activity;
 import android.os.Bundle;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.net.Uri;
 import android.graphics.Color;
 import android.graphics.Typeface;
-import android.graphics.drawable.GradientDrawable;
-import android.net.Uri;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.view.Gravity;
 import android.view.View;
-import android.view.Window;
-import android.widget.*;
-import android.provider.MediaStore;
+import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
+import android.content.Context;
+import android.content.ClipData;
+import android.text.InputType;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
+import android.widget.HorizontalScrollView;
+import android.widget.Toast;
+import android.widget.RadioGroup;
+import android.widget.RadioButton;
+import android.widget.FrameLayout;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Locale;
 
 public class MainActivity extends Activity {
 
-    private String currentPage = "splash";
-    private String language = "ar";
-
-    private final int GREEN = Color.rgb(23, 107, 58);
-    private final int LIGHT_GREEN = Color.rgb(46, 139, 87);
-    private final int GOLD = Color.rgb(212, 175, 55);
-    private final int CREAM = Color.rgb(249, 244, 236);
-    private final int BROWN = Color.rgb(91, 58, 30);
+    private final int GREEN = Color.rgb(16, 78, 54);
+    private final int DARK_GREEN = Color.rgb(9, 54, 38);
+    private final int GOLD = Color.rgb(210, 166, 65);
+    private final int CREAM = Color.rgb(249, 246, 236);
     private final int WHITE = Color.WHITE;
+    private final int TEXT = Color.rgb(45, 50, 44);
 
-    private EditText sellQuantity;
-    private EditText sellPrice;
-    private ImageView selectedImageView;
-    private Uri selectedImageUri;
+    private LinearLayout root;
+    private LinearLayout content;
+    private String language = "ar";
+    private String currentPage = "home";
 
-    private static final int PICK_IMAGE_REQUEST = 100;
+    private EditText titleInput;
+    private EditText sellerInput;
+    private EditText phoneInput;
+    private EditText varietyInput;
+    private EditText quantityInput;
+    private EditText priceInput;
+    private EditText descriptionInput;
+
+    private final ArrayList<Uri> selectedPhotos = new ArrayList<>();
+    private final ArrayList<Listing> listings = new ArrayList<>();
+
+    private static final int PICK_IMAGES = 2001;
+    private static final int MAX_IMAGES = 10;
+
+    private SharedPreferences preferences;
+
+    private static class Listing {
+        String title;
+        String seller;
+        String phone;
+        String variety;
+        String quantity;
+        String price;
+        String description;
+        ArrayList<String> photos = new ArrayList<>();
+
+        JSONObject toJson() throws Exception {
+            JSONObject obj = new JSONObject();
+            obj.put("title", title);
+            obj.put("seller", seller);
+            obj.put("phone", phone);
+            obj.put("variety", variety);
+            obj.put("quantity", quantity);
+            obj.put("price", price);
+            obj.put("description", description);
+
+            JSONArray arr = new JSONArray();
+            for (String photo : photos) {
+                arr.put(photo);
+            }
+            obj.put("photos", arr);
+            return obj;
+        }
+
+        static Listing fromJson(JSONObject obj) throws Exception {
+            Listing item = new Listing();
+            item.title = obj.optString("title");
+            item.seller = obj.optString("seller");
+            item.phone = obj.optString("phone");
+            item.variety = obj.optString("variety");
+            item.quantity = obj.optString("quantity");
+            item.price = obj.optString("price");
+            item.description = obj.optString("description");
+
+            JSONArray arr = obj.optJSONArray("photos");
+            if (arr != null) {
+                for (int i = 0; i < arr.length(); i++) {
+                    item.photos.add(arr.getString(i));
+                }
+            }
+            return item;
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        getWindow().setStatusBarColor(GREEN);
-        getWindow().setNavigationBarColor(GREEN);
+        preferences = getSharedPreferences("DATRIDHA_SETTINGS", MODE_PRIVATE);
+        language = preferences.getString("language", "ar");
+        loadListings();
 
         showSplash();
     }
 
-    // =========================================================
-    // أدوات عامة
-    // =========================================================
+    private String tr(String ar, String fr, String en) {
+        if ("fr".equals(language)) return fr;
+        if ("en".equals(language)) return en;
+        return ar;
+    }
 
     private int dp(float value) {
-        return (int) (
-                value * getResources()
-                        .getDisplayMetrics().density + 0.5f
-        );
+        return (int) (value * getResources().getDisplayMetrics().density + 0.5f);
     }
 
-    private GradientDrawable roundedBackground(
-            int color,
-            float radius
-    ) {
-        GradientDrawable drawable = new GradientDrawable();
-        drawable.setColor(color);
-        drawable.setCornerRadius(dp(radius));
-        return drawable;
+    private LinearLayout vertical() {
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        return layout;
     }
 
-    private TextView makeText(
-            String value,
-            float size,
-            int color
-    ) {
-        TextView text = new TextView(this);
-
-        text.setText(value);
-        text.setTextSize(size);
-        text.setTextColor(color);
-        text.setGravity(Gravity.CENTER);
-        text.setIncludeFontPadding(true);
-        text.setPadding(dp(8), dp(6), dp(8), dp(6));
-
-        return text;
+    private LinearLayout horizontal() {
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.HORIZONTAL);
+        layout.setGravity(Gravity.CENTER_VERTICAL);
+        return layout;
     }
 
-    private Button makeButton(String title) {
-        Button button = new Button(this);
-
-        button.setText(title);
-        button.setTextSize(17);
-        button.setTextColor(WHITE);
-        button.setAllCaps(false);
-        button.setGravity(Gravity.CENTER);
-        button.setPadding(dp(12), dp(4), dp(12), dp(4));
-
-        button.setBackground(
-                roundedBackground(GREEN, 45)
-        );
-
-        return button;
+    private LinearLayout.LayoutParams lp(int width, int height) {
+        return new LinearLayout.LayoutParams(width, height);
     }
 
-    private void addButton(
-            LinearLayout root,
-            Button button
-    ) {
-        LinearLayout.LayoutParams params =
-                new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
-                );
-
-        params.setMargins(0, dp(5), 0, dp(5));
-
-        root.addView(button, params);
+    private LinearLayout.LayoutParams margin(int width, int height, int left, int top, int right, int bottom) {
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(width, height);
+        params.setMargins(dp(left), dp(top), dp(right), dp(bottom));
+        return params;
     }
 
-    private void addSpace(
-            LinearLayout root,
-            int height
-    ) {
-        Space space = new Space(this);
-
-        root.addView(
-                space,
-                new LinearLayout.LayoutParams(
-                        1,
-                        dp(height)
-                )
-        );
+    private TextView text(String value, int size, int color, boolean bold) {
+        TextView view = new TextView(this);
+        view.setText(value);
+        view.setTextSize(size);
+        view.setTextColor(color);
+        view.setGravity(Gravity.CENTER_VERTICAL);
+        if (bold) view.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+        view.setPadding(dp(2), dp(3), dp(2), dp(3));
+        return view;
     }
 
-    /*
-     * مهم:
-     * هذه الدالة تعرض ScrollView مرة واحدة فقط.
-     * لا تستدعِ setContentView(root) في نهاية الصفحات
-     * التي تستخدم baseLayout().
-     */
-    private LinearLayout baseLayout() {
+    private Button button(String label, int background, int foreground) {
+        Button btn = new Button(this);
+        btn.setText(label);
+        btn.setTextColor(foreground);
+        btn.setTextSize(14);
+        btn.setAllCaps(false);
+        btn.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+        btn.setBackgroundTintList(android.content.res.ColorStateList.valueOf(background));
+        return btn;
+    }
+
+    private EditText edit(String hint, int inputType) {
+        EditText field = new EditText(this);
+        field.setHint(hint);
+        field.setTextSize(15);
+        field.setTextColor(TEXT);
+        field.setHintTextColor(Color.GRAY);
+        field.setSingleLine(false);
+        field.setInputType(inputType);
+        field.setPadding(dp(12), dp(10), dp(12), dp(10));
+        field.setBackgroundTintList(android.content.res.ColorStateList.valueOf(GOLD));
+        return field;
+    }
+
+    private ScrollView newScroll() {
         ScrollView scroll = new ScrollView(this);
-
         scroll.setFillViewport(true);
-        scroll.setClipToPadding(false);
-
-        LinearLayout content = new LinearLayout(this);
-
-        content.setOrientation(LinearLayout.VERTICAL);
-        content.setPadding(
-                dp(20),
-                dp(20),
-                dp(20),
-                dp(30)
-        );
-
-        content.setBackgroundColor(CREAM);
-
-        scroll.addView(
-                content,
-                new ScrollView.LayoutParams(
-                        ScrollView.LayoutParams.MATCH_PARENT,
-                        ScrollView.LayoutParams.WRAP_CONTENT
-                )
-        );
-
-        setContentView(scroll);
-
-        return content;
+        return scroll;
     }
 
-    private void addHeader(
-            LinearLayout root,
-            String title
-    ) {
-        TextView header = makeText(
-                title,
-                25,
-                WHITE
-        );
-
-        header.setTypeface(
-                Typeface.DEFAULT,
-                Typeface.BOLD
-        );
-
-        header.setBackground(
-                roundedBackground(GREEN, 35)
-        );
-
-        header.setPadding(
-                dp(10),
-                dp(18),
-                dp(10),
-                dp(18)
-        );
-
-        LinearLayout.LayoutParams params =
-                new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
-                );
-
-        params.setMargins(0, 0, 0, dp(20));
-
-        root.addView(header, params);
-    }
-
-    // =========================================================
-    // شاشة البداية
-    // =========================================================
-
-    private void showSplash() {
-
-        currentPage = "splash";
-
-        Window window = getWindow();
-
-        window.setStatusBarColor(Color.TRANSPARENT);
-        window.setNavigationBarColor(GREEN);
-
-        window.getDecorView().setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-        );
-
-        FrameLayout root = new FrameLayout(this);
+    private void buildShell(String title) {
+        root = vertical();
         root.setBackgroundColor(CREAM);
 
-        // صورة الخلفية
-        ImageView background = new ImageView(this);
+        LinearLayout header = horizontal();
+        header.setBackgroundColor(DARK_GREEN);
+        header.setPadding(dp(12), dp(10), dp(12), dp(10));
 
-        background.setImageResource(
-                R.drawable.image_2bd7123b
-        );
+        TextView brand = text("DATRIDHA", 22, GOLD, true);
+        header.addView(brand, new LinearLayout.LayoutParams(0, dp(48), 1));
 
-        background.setScaleType(
-                ImageView.ScaleType.CENTER_CROP
-        );
+        TextView pageTitle = text(title, 15, WHITE, true);
+        pageTitle.setGravity(Gravity.CENTER);
+        header.addView(pageTitle, lp(-2, dp(48)));
 
-        root.addView(
-                background,
-                new FrameLayout.LayoutParams(
-                        FrameLayout.LayoutParams.MATCH_PARENT,
-                        FrameLayout.LayoutParams.MATCH_PARENT
-                )
-        );
+        root.addView(header, lp(-1, -2));
 
-        // العبارات الموجودة تحت شعار DATRIDHA
-        LinearLayout phrases = new LinearLayout(this);
+        ScrollView scroll = newScroll();
+        content = vertical();
+        content.setPadding(dp(14), dp(12), dp(14), dp(18));
+        scroll.addView(content);
+        root.addView(scroll, new LinearLayout.LayoutParams(-1, 0, 1));
 
-        phrases.setOrientation(
-                LinearLayout.VERTICAL
-        );
+        LinearLayout nav = horizontal();
+        nav.setBackgroundColor(DARK_GREEN);
+        nav.setPadding(dp(3), dp(5), dp(3), dp(5));
 
-        phrases.setGravity(Gravity.CENTER);
-        phrases.setClipChildren(false);
-        phrases.setClipToPadding(false);
+        addNavButton(nav, tr("الرئيسية", "Accueil", "Home"), "home");
+        addNavButton(nav, tr("شراء", "Acheter", "Buy"), "buy");
+        addNavButton(nav, tr("بيع", "Vendre", "Sell"), "sell");
+        addNavButton(nav, tr("طلباتي", "Mes annonces", "My listings"), "orders");
+        addNavButton(nav, tr("المزيد", "Menu", "More"), "more");
 
-        phrases.setPadding(
-                dp(12),
-                dp(4),
-                dp(12),
-                dp(4)
-        );
+        root.addView(nav, lp(-1, -2));
+        setContentView(root);
+    }
 
-        TextView phrase1 = makeText(
-                "دڤلة نور تونسية أصيلة",
-                27,
-                BROWN
-        );
+    private void addNavButton(LinearLayout nav, String label, final String page) {
+        Button btn = new Button(this);
+        btn.setText(label);
+        btn.setTextSize(11);
+        btn.setAllCaps(false);
+        btn.setTextColor(WHITE);
+        btn.setPadding(dp(1), 0, dp(1), 0);
+        btn.setBackgroundColor(DARK_GREEN);
+        btn.setOnClickListener(v -> openPage(page));
+        nav.addView(btn, new LinearLayout.LayoutParams(0, dp(48), 1));
+    }
 
-        phrase1.setTypeface(
-                Typeface.create(
-                        "serif",
-                        Typeface.BOLD_ITALIC
-                )
-        );
+    private void showSplash() {
+        root = vertical();
+        root.setBackgroundColor(DARK_GREEN);
+        root.setGravity(Gravity.CENTER);
 
-        phrase1.setShadowLayer(
-                2,
-                0,
-                1,
-                Color.WHITE
-        );
+        ImageView logo = new ImageView(this);
+        logo.setImageResource(R.drawable.image_2bd7123b);
+        logo.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        root.addView(logo, lp(-1, dp(280)));
 
-        phrases.addView(
-                phrase1,
-                new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
-                )
-        );
+        TextView name = text("DATRIDHA", 34, GOLD, true);
+        name.setGravity(Gravity.CENTER);
+        root.addView(name, margin(-1, dp(55), 12, 12, 12, 0));
 
-        TextView phrase2 = makeText(
-                "دڤلة ڤبلي",
-                23,
-                BROWN
-        );
+        TextView subtitle = text(
+                tr("سوق دقلة النور بالجملة", "Le marché de Deglet Nour en gros", "Deglet Nour Wholesale Market"),
+                17, WHITE, true);
+        subtitle.setGravity(Gravity.CENTER);
+        root.addView(subtitle, margin(-1, dp(50), 12, 4, 12, 10));
 
-        phrase2.setTypeface(
-                Typeface.create(
-                        "serif",
-                        Typeface.BOLD_ITALIC
-                )
-        );
-
-        phrase2.setShadowLayer(
-                2,
-                0,
-                1,
-                Color.WHITE
-        );
-
-        LinearLayout.LayoutParams phrase2Params =
-                new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
-                );
-
-        phrase2Params.topMargin = dp(2);
-
-        phrases.addView(phrase2, phrase2Params);
-
-        TextView phrase3 = makeText(
-                "بيع - شراء - تعامل",
-                18,
-                BROWN
-        );
-
-        phrase3.setTypeface(
-                Typeface.DEFAULT,
-                Typeface.BOLD
-        );
-
-        phrase3.setShadowLayer(
-                2,
-                0,
-                1,
-                Color.WHITE
-        );
-
-        LinearLayout.LayoutParams phrase3Params =
-                new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
-                );
-
-        phrase3Params.topMargin = dp(2);
-
-        phrases.addView(phrase3, phrase3Params);
-
-        FrameLayout.LayoutParams phrasesParams =
-                new FrameLayout.LayoutParams(
-                        FrameLayout.LayoutParams.MATCH_PARENT,
-                        FrameLayout.LayoutParams.WRAP_CONTENT
-                );
-
-        phrasesParams.gravity =
-                Gravity.TOP | Gravity.CENTER_HORIZONTAL;
-
-        root.addView(phrases, phrasesParams);
-
-        // مجموعة الأزرار السفلية
-        LinearLayout bottomContent = new LinearLayout(this);
-
-        bottomContent.setOrientation(
-                LinearLayout.VERTICAL
-        );
-
-        bottomContent.setGravity(
-                Gravity.CENTER_HORIZONTAL
-        );
-
-        bottomContent.setPadding(
-                dp(16),
-                dp(8),
-                dp(16),
-                dp(12)
-        );
-
-        FrameLayout.LayoutParams bottomParams =
-                new FrameLayout.LayoutParams(
-                        FrameLayout.LayoutParams.MATCH_PARENT,
-                        FrameLayout.LayoutParams.WRAP_CONTENT
-                );
-
-        bottomParams.gravity =
-                Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
-
-        // رفع مجموعة الأزرار قليلًا عن أسفل الشاشة
-        bottomParams.bottomMargin = dp(18);
-
-        root.addView(bottomContent, bottomParams);
-
-        String startTitle;
-
-        if ("fr".equals(language)) {
-            startTitle = "Commencer maintenant";
-        } else if ("en".equals(language)) {
-            startTitle = "Start now";
-        } else {
-            startTitle = "ابدأ الآن";
-        }
-
-        Button startButton = makeButton(startTitle);
-
-        startButton.setTextSize(19);
-
-        startButton.setTypeface(
-                Typeface.DEFAULT,
-                Typeface.BOLD
-        );
-
-        startButton.setBackground(
-                roundedBackground(GREEN, 55)
-        );
-
-        startButton.setOnClickListener(v -> showHome());
-
-        LinearLayout.LayoutParams startParams =
-                new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        dp(56)
-                );
-
-        startParams.setMargins(
-                dp(20),
-                0,
-                dp(20),
-                dp(8)
-        );
-
-        bottomContent.addView(startButton, startParams);
-
-        // أزرار اللغات
-        LinearLayout languages = new LinearLayout(this);
-
-        languages.setOrientation(
-                LinearLayout.HORIZONTAL
-        );
-
-        languages.setGravity(Gravity.CENTER);
-
-        Button ar = makeButton("العربية");
-        Button fr = makeButton("Français");
-        Button en = makeButton("English");
-
-        ar.setTextSize(13);
-        fr.setTextSize(13);
-        en.setTextSize(13);
-
-        ar.setOnClickListener(v -> {
-            language = "ar";
-            showSplash();
-        });
-
-        fr.setOnClickListener(v -> {
-            language = "fr";
-            showSplash();
-        });
-
-        en.setOnClickListener(v -> {
-            language = "en";
-            showSplash();
-        });
-
-        languages.addView(
-                ar,
-                new LinearLayout.LayoutParams(
-                        0,
-                        dp(44),
-                        1
-                )
-        );
-
-        languages.addView(
-                fr,
-                new LinearLayout.LayoutParams(
-                        0,
-                        dp(44),
-                        1
-                )
-        );
-
-        languages.addView(
-                en,
-                new LinearLayout.LayoutParams(
-                        0,
-                        dp(44),
-                        1
-                )
-        );
-
-        bottomContent.addView(languages);
+        Button start = button(tr("الدخول إلى التطبيق", "Entrer dans l'application", "Enter the app"), GOLD, DARK_GREEN);
+        root.addView(start, margin(-1, dp(55), 28, 20, 28, 0));
+        start.setOnClickListener(v -> openPage("home"));
 
         setContentView(root);
-
-        // وضع العبارات تحت الشعار
-        root.post(() -> {
-
-            int screenHeight = root.getHeight();
-
-            FrameLayout.LayoutParams params =
-                    (FrameLayout.LayoutParams)
-                            phrases.getLayoutParams();
-
-            params.topMargin =
-                    (int) (screenHeight * 0.34f);
-
-            phrases.setLayoutParams(params);
-        });
     }
 
-    // =========================================================
-    // الصفحة الرئيسية
-    // =========================================================
+    private void openPage(String page) {
+        currentPage = page;
+
+        switch (page) {
+            case "home":
+                showHome();
+                break;
+            case "buy":
+                showBuy();
+                break;
+            case "sell":
+                showSell();
+                break;
+            case "orders":
+                showOrders();
+                break;
+            case "more":
+                showMore();
+                break;
+            case "settings":
+                showSettings();
+                break;
+            case "contact":
+                showContact();
+                break;
+            default:
+                showHome();
+        }
+    }
+
+    private void addHeading(String title) {
+        TextView heading = text(title, 23, GREEN, true);
+        heading.setGravity(Gravity.CENTER);
+        content.addView(heading, margin(-1, dp(54), 0, 2, 0, 8));
+    }
+
+    private void addParagraph(String value) {
+        TextView paragraph = text(value, 15, TEXT, false);
+        paragraph.setGravity(Gravity.CENTER);
+        paragraph.setPadding(dp(8), dp(8), dp(8), dp(8));
+        content.addView(paragraph, margin(-1, -2, 0, 4, 0, 8));
+    }
+
+    private void addSection(String value) {
+        TextView section = text(value, 18, GREEN, true);
+        content.addView(section, margin(-1, dp(42), 0, 8, 0, 2));
+    }
+
+    private void addPhoto(int resource, String description, int height) {
+        ImageView image = new ImageView(this);
+        image.setImageResource(resource);
+        image.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        image.setContentDescription(description);
+        content.addView(image, margin(-1, dp(height), 0, 6, 0, 6));
+    }
 
     private void showHome() {
+        buildShell(tr("الرئيسية", "Accueil", "Home"));
+        addHeading(tr("دقلة النور من بشني", "Deglet Nour de Bechni", "Deglet Nour from Bechni"));
+        addParagraph(tr(
+                "من المنتج إلى التاجر، جودة تونسية وأصالة من واحات الجنوب.",
+                "Du producteur au grossiste, qualité tunisienne et authenticité des oasis du Sud.",
+                "From producer to wholesaler, Tunisian quality from the southern oases."));
 
-        currentPage = "home";
+        addPhoto(R.drawable.image_69792f84, "Deglet Nour packaging", 190);
+        addSection(tr("سوق التمور بالجملة", "Marché de dattes en gros", "Wholesale Dates Market"));
+        addParagraph(tr(
+                "اكتشف عروض التمور، أضف إعلانك، وتواصل مباشرة مع البائع.",
+                "Découvrez les offres, publiez une annonce et contactez directement le vendeur.",
+                "Discover date offers, publish a listing, and contact the seller."));
 
-        getWindow().getDecorView().setSystemUiVisibility(0);
-        getWindow().setStatusBarColor(GREEN);
-        getWindow().setNavigationBarColor(GREEN);
+        Button buy = button(tr("اكتشف التمور", "Découvrir les dattes", "Explore dates"), GREEN, WHITE);
+        content.addView(buy, margin(-1, dp(52), 0, 6, 0, 4));
+        buy.setOnClickListener(v -> openPage("buy"));
 
-        LinearLayout root = baseLayout();
+        Button sell = button(tr("أضف إعلان بيع", "Publier une annonce", "Post a listing"), GOLD, DARK_GREEN);
+        content.addView(sell, margin(-1, dp(52), 0, 4, 0, 10));
+        sell.setOnClickListener(v -> openPage("sell"));
 
-        addHeader(root, "DATRIDHA");
-
-        TextView welcome = makeText(
-                "مرحباً بكم في DATRIDHA",
-                24,
-                GREEN
-        );
-
-        welcome.setTypeface(
-                Typeface.DEFAULT,
-                Typeface.BOLD
-        );
-
-        root.addView(welcome);
-
-        root.addView(
-                makeText(
-                        "منصة تجارة دقلة النور من بشني",
-                        17,
-                        BROWN
-                )
-        );
-
-        addSpace(root, 15);
-
-        Button buy = makeButton("🛒 شراء دقلة النور");
-        buy.setOnClickListener(v -> showBuy());
-        addButton(root, buy);
-
-        Button sell = makeButton("📦 بيع دقلة النور");
-        sell.setOnClickListener(v -> showSell());
-        addButton(root, sell);
-
-        Button orders = makeButton("📋 طلباتي");
-        orders.setOnClickListener(v -> showOrders());
-        addButton(root, orders);
-
-        Button contact = makeButton("📞 اتصل بنا");
-        contact.setOnClickListener(v -> showContact());
-        addButton(root, contact);
-
-        Button settings = makeButton("⚙ الإعدادات");
-        settings.setOnClickListener(v -> showSettings());
-        addButton(root, settings);
-
-        // لا نعيد استدعاء setContentView هنا.
+        addPhoto(R.drawable.image_562aeaad, "Oasis and dates", 180);
+        addPhoto(R.drawable.dates_basket_1, "Dates in a traditional basket", 180);
+        addPhoto(R.drawable.dates_basket_2, "Dates in a traditional basket", 180);
     }
-
-    // =========================================================
-    // صفحة الشراء
-    // =========================================================
 
     private void showBuy() {
+        buildShell(tr("شراء التمور", "Acheter des dattes", "Buy dates"));
+        addHeading(tr("عروض دقلة النور", "Offres Deglet Nour", "Deglet Nour Offers"));
+        addParagraph(tr(
+                "تصفح العروض المنشورة على هذا الهاتف. الأسعار والكميات يحددها البائع.",
+                "Parcourez les annonces enregistrées sur ce téléphone. Le vendeur fixe les prix et quantités.",
+                "Browse listings saved on this phone. Sellers set their own prices and quantities."));
 
-        currentPage = "buy";
+        addPhoto(R.drawable.image_69792f84, "Deglet Nour", 180);
+        addPhoto(R.drawable.image_562aeaad, "Date oasis", 150);
 
-        LinearLayout root = baseLayout();
-
-        addHeader(root, "شراء دقلة النور");
-
-        addProduct(
-                root,
-                "دقلة النور من بشني",
-                "تمر فاخر • جودة عالية",
-                "السعر حسب الكمية"
-        );
-
-        addProduct(
-                root,
-                "دقلة نور ممتازة",
-                "اختيار المنتج مباشرة من المصدر",
-                "الدفع عند الاستلام"
-        );
-
-        Button back = makeButton("← العودة");
-        back.setOnClickListener(v -> showHome());
-        addButton(root, back);
+        if (listings.isEmpty()) {
+            addParagraph(tr(
+                    "لا توجد إعلانات محفوظة بعد. يمكنك إضافة إعلان من صفحة البيع.",
+                    "Aucune annonce enregistrée. Vous pouvez en ajouter depuis la page Vente.",
+                    "No saved listings yet. You can add one from the Sell page."));
+        } else {
+            for (int i = listings.size() - 1; i >= 0; i--) {
+                addListingCard(listings.get(i));
+            }
+        }
     }
 
-    private void addProduct(
-            LinearLayout root,
-            String title,
-            String description,
-            String price
-    ) {
-        LinearLayout card = new LinearLayout(this);
+    private void addListingCard(Listing item) {
+        LinearLayout card = vertical();
+        card.setBackgroundColor(WHITE);
+        card.setPadding(dp(12), dp(10), dp(12), dp(10));
 
-        card.setOrientation(
-                LinearLayout.VERTICAL
-        );
+        TextView title = text(item.title, 18, GREEN, true);
+        card.addView(title, lp(-1, -2));
 
-        card.setPadding(
-                dp(20),
-                dp(20),
-                dp(20),
-                dp(20)
-        );
+        TextView variety = text(
+                tr("الصنف: ", "Variété : ", "Variety: ") + item.variety,
+                14, TEXT, false);
+        card.addView(variety, lp(-1, -2));
 
-        card.setBackground(
-                roundedBackground(WHITE, 30)
-        );
+        TextView quantity = text(
+                tr("الكمية: ", "Quantité : ", "Quantity: ") + item.quantity,
+                14, TEXT, false);
+        card.addView(quantity, lp(-1, -2));
 
-        TextView titleText = makeText(
-                title,
-                21,
-                GREEN
-        );
+        TextView price = text(
+                tr("السعر: ", "Prix : ", "Price: ") + item.price + " DT",
+                16, GREEN, true);
+        card.addView(price, lp(-1, -2));
 
-        titleText.setTypeface(
-                Typeface.DEFAULT,
-                Typeface.BOLD
-        );
+        if (item.photos.size() > 0) {
+            ImageView image = new ImageView(this);
+            image.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            try {
+                image.setImageURI(Uri.parse(item.photos.get(0)));
+            } catch (Exception ignored) {
+            }
+            card.addView(image, margin(-1, dp(150), 0, 8, 0, 8));
+        }
 
-        card.addView(titleText);
+        TextView seller = text(
+                tr("البائع: ", "Vendeur : ", "Seller: ") + item.seller,
+                14, TEXT, false);
+        card.addView(seller, lp(-1, -2));
 
-        card.addView(
-                makeText(description, 16, BROWN)
-        );
+        if (!item.description.isEmpty()) {
+            TextView desc = text(item.description, 14, TEXT, false);
+            card.addView(desc, lp(-1, -2));
+        }
 
-        card.addView(
-                makeText(price, 17, GOLD)
-        );
+        Button call = button(
+                tr("اتصال بالبائع", "Appeler le vendeur", "Call seller"),
+                GOLD, DARK_GREEN);
+        card.addView(call, margin(-1, dp(48), 0, 8, 0, 2));
+        call.setOnClickListener(v -> {
+            if (item.phone != null && !item.phone.trim().isEmpty()) {
+                Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + item.phone));
+                startActivity(intent);
+            } else {
+                Toast.makeText(this, tr("لا يوجد رقم هاتف", "Aucun numéro", "No phone number"), Toast.LENGTH_SHORT).show();
+            }
+        });
 
-        Button details = makeButton("عرض التفاصيل");
-
-        details.setOnClickListener(
-                v -> showOfferDetails()
-        );
-
-        card.addView(details);
-
-        LinearLayout.LayoutParams params =
-                new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
-                );
-
-        params.setMargins(
-                dp(10),
-                dp(10),
-                dp(10),
-                dp(20)
-        );
-
-        root.addView(card, params);
+        content.addView(card, margin(-1, -2, 0, 6, 0, 12));
     }
-
-    // =========================================================
-    // تفاصيل العرض
-    // =========================================================
-
-    private void showOfferDetails() {
-
-        currentPage = "details";
-
-        LinearLayout root = baseLayout();
-
-        addHeader(root, "تفاصيل العرض");
-
-        root.addView(
-                makeText(
-                        "دقلة النور من بشني",
-                        25,
-                        GREEN
-                )
-        );
-
-        root.addView(
-                makeText(
-                        "تمر فاخر من واحات بشني – الفوار – قبلي",
-                        17,
-                        BROWN
-                )
-        );
-
-        root.addView(
-                makeText(
-                        "تجارة مباشرة • جودة • ثقة",
-                        17,
-                        GOLD
-                )
-        );
-
-        Button call = makeButton("📞 الاتصال بالبائع");
-        call.setOnClickListener(v -> callPhone());
-        addButton(root, call);
-
-        Button order = makeButton("🛒 طلب المنتج");
-
-        order.setOnClickListener(v ->
-                Toast.makeText(
-                        this,
-                        "تم تسجيل طلبك على هذا الجهاز",
-                        Toast.LENGTH_SHORT
-                ).show()
-        );
-
-        addButton(root, order);
-
-        Button back = makeButton("← العودة");
-        back.setOnClickListener(v -> showBuy());
-        addButton(root, back);
-    }
-
-    // =========================================================
-    // صفحة البيع
-    // =========================================================
 
     private void showSell() {
+        selectedPhotos.clear();
+        buildShell(tr("إضافة إعلان", "Ajouter une annonce", "Create Listing"));
+        addHeading(tr("أضف إعلانك", "Publiez votre annonce", "Post Your Listing"));
+        addParagraph(tr(
+                "أدخل معلومات التمور وأرفق حتى 10 صور.",
+                "Saisissez les informations et ajoutez jusqu'à 10 photos.",
+                "Enter the date details and add up to 10 photos."));
 
-        currentPage = "sell";
+        titleInput = edit(tr("عنوان الإعلان", "Titre de l'annonce", "Listing title"),
+                InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
+        content.addView(titleInput, margin(-1, dp(54), 0, 5, 0, 5));
 
-        LinearLayout root = baseLayout();
+        sellerInput = edit(tr("اسم البائع", "Nom du vendeur", "Seller name"),
+                InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
+        content.addView(sellerInput, margin(-1, dp(54), 0, 5, 0, 5));
 
-        addHeader(root, "بيع دقلة النور");
+        phoneInput = edit(tr("رقم الهاتف", "Numéro de téléphone", "Phone number"),
+                InputType.TYPE_CLASS_PHONE);
+        content.addView(phoneInput, margin(-1, dp(54), 0, 5, 0, 5));
 
-        sellQuantity = new EditText(this);
-        sellQuantity.setHint("الكمية بالكيلوغرام");
+        varietyInput = edit(tr("الصنف أو الدرجة: دقلة نور ممتازة، عادية...", "Variété ou catégorie", "Variety or grade"),
+                InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
+        content.addView(varietyInput, margin(-1, dp(54), 0, 5, 0, 5));
 
-        sellQuantity.setInputType(
-                android.text.InputType.TYPE_CLASS_NUMBER
-        );
+        quantityInput = edit(tr("الكمية بالكلغ أو بالطن", "Quantité en kg ou tonnes", "Quantity in kg or tonnes"),
+                InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        content.addView(quantityInput, margin(-1, dp(54), 0, 5, 0, 5));
 
-        root.addView(sellQuantity);
+        priceInput = edit(tr("السعر بالدينار التونسي", "Prix en dinars tunisiens", "Price in Tunisian dinars"),
+                InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        content.addView(priceInput, margin(-1, dp(54), 0, 5, 0, 5));
 
-        sellPrice = new EditText(this);
-        sellPrice.setHint("السعر للكيلوغرام");
+        descriptionInput = edit(tr("وصف التمور والجودة ومكان التسليم", "Description, qualité et lieu de livraison", "Description, quality and pickup location"),
+                InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
+        descriptionInput.setMinLines(3);
+        content.addView(descriptionInput, margin(-1, dp(105), 0, 5, 0, 5));
 
-        sellPrice.setInputType(
-                android.text.InputType.TYPE_CLASS_NUMBER
-                        | android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL
-        );
+        Button choosePhotos = button(
+                tr("اختيار الصور (حتى 10)", "Choisir des photos (max. 10)", "Choose photos (up to 10)"),
+                GREEN, WHITE);
+        content.addView(choosePhotos, margin(-1, dp(52), 0, 8, 0, 4));
+        choosePhotos.setOnClickListener(v -> pickPhotos());
 
-        root.addView(sellPrice);
+        HorizontalScrollView photoScroll = new HorizontalScrollView(this);
+        LinearLayout photoStrip = horizontal();
+        photoStrip.setTag("photoStrip");
+        photoScroll.addView(photoStrip);
+        content.addView(photoScroll, margin(-1, dp(115), 0, 2, 0, 8));
 
-        selectedImageView = new ImageView(this);
-        selectedImageView.setVisibility(View.GONE);
-
-        selectedImageView.setScaleType(
-                ImageView.ScaleType.CENTER_CROP
-        );
-
-        LinearLayout.LayoutParams imageParams =
-                new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        dp(220)
-                );
-
-        imageParams.setMargins(
-                0,
-                dp(10),
-                0,
-                dp(10)
-        );
-
-        root.addView(selectedImageView, imageParams);
-
-        Button photo = makeButton("📷 إضافة صورة");
-        photo.setOnClickListener(v -> chooseImage());
-        addButton(root, photo);
-
-        Button publish = makeButton("نشر العرض");
-
-        publish.setOnClickListener(v -> {
-
-            String quantity =
-                    sellQuantity.getText().toString().trim();
-
-            String price =
-                    sellPrice.getText().toString().trim();
-
-            if (quantity.isEmpty() || price.isEmpty()) {
-
-                Toast.makeText(
-                        this,
-                        "يرجى إدخال الكمية والسعر",
-                        Toast.LENGTH_SHORT
-                ).show();
-
-                return;
-            }
-
-            Toast.makeText(
-                    this,
-                    "تم إعداد العرض. النشر هنا محلي فقط.",
-                    Toast.LENGTH_LONG
-            ).show();
-        });
-
-        addButton(root, publish);
-
-        Button back = makeButton("← العودة");
-        back.setOnClickListener(v -> showHome());
-        addButton(root, back);
+        Button publish = button(
+                tr("حفظ الإعلان", "Enregistrer l'annonce", "Save Listing"),
+                GOLD, DARK_GREEN);
+        content.addView(publish, margin(-1, dp(55), 0, 8, 0, 12));
+        publish.setOnClickListener(v -> saveListing());
     }
 
-    // =========================================================
-    // اختيار صورة من المعرض
-    // =========================================================
-
-    @Override
-    protected void onActivityResult(
-            int requestCode,
-            int resultCode,
-            Intent data
-    ) {
-        super.onActivityResult(
-                requestCode,
-                resultCode,
-                data
-        );
-
-        if (requestCode == PICK_IMAGE_REQUEST
-                && resultCode == RESULT_OK
-                && data != null
-                && data.getData() != null) {
-
-            selectedImageUri = data.getData();
-
-            if (selectedImageView != null) {
-
-                selectedImageView.setImageURI(
-                        selectedImageUri
-                );
-
-                selectedImageView.setVisibility(
-                        View.VISIBLE
-                );
-            }
-
-            Toast.makeText(
-                    this,
-                    "تم اختيار الصورة",
-                    Toast.LENGTH_SHORT
-            ).show();
-        }
-    }
-
-    private void chooseImage() {
+    private void pickPhotos() {
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("image/*");
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
 
         try {
-            Intent intent = new Intent(
-                    Intent.ACTION_PICK,
-                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-            );
-
-            startActivityForResult(
-                    intent,
-                    PICK_IMAGE_REQUEST
-            );
-
+            startActivityForResult(intent, PICK_IMAGES);
         } catch (Exception e) {
-
-            Toast.makeText(
-                    this,
-                    "تعذر فتح معرض الصور",
-                    Toast.LENGTH_SHORT
-            ).show();
+            Toast.makeText(this, tr("تعذر فتح الصور", "Impossible d'ouvrir les photos", "Unable to open photos"), Toast.LENGTH_SHORT).show();
         }
     }
 
-    // =========================================================
-    // صفحة الطلبات
-    // =========================================================
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode != PICK_IMAGES || resultCode != RESULT_OK || data == null) return;
+
+        if (data.getClipData() != null) {
+            ClipData clip = data.getClipData();
+            for (int i = 0; i < clip.getItemCount(); i++) {
+                if (selectedPhotos.size() >= MAX_IMAGES) break;
+                Uri uri = clip.getItemAt(i).getUri();
+                if (!selectedPhotos.contains(uri)) selectedPhotos.add(uri);
+            }
+        } else if (data.getData() != null) {
+            selectedPhotos.clear();
+            selectedPhotos.add(data.getData());
+        }
+
+        refreshPhotoStrip();
+        Toast.makeText(this,
+                tr("عدد الصور: ", "Nombre de photos : ", "Number of photos: ") + selectedPhotos.size(),
+                Toast.LENGTH_SHORT).show();
+    }
+
+    private void refreshPhotoStrip() {
+        if (content == null) return;
+
+        HorizontalScrollView scroll = null;
+        for (int i = 0; i < content.getChildCount(); i++) {
+            View view = content.getChildAt(i);
+            if (view instanceof HorizontalScrollView) {
+                scroll = (HorizontalScrollView) view;
+            }
+        }
+
+        if (scroll == null) return;
+
+        LinearLayout strip = (LinearLayout) scroll.getChildAt(0);
+        strip.removeAllViews();
+
+        for (int i = 0; i < selectedPhotos.size(); i++) {
+            final int index = i;
+            LinearLayout item = vertical();
+
+            ImageView preview = new ImageView(this);
+            preview.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            preview.setImageURI(selectedPhotos.get(i));
+            item.addView(preview, lp(dp(90), dp(75)));
+
+            Button remove = button("×", Color.RED, WHITE);
+            item.addView(remove, lp(dp(90), dp(36)));
+            remove.setOnClickListener(v -> {
+                if (index < selectedPhotos.size()) {
+                    selectedPhotos.remove(index);
+                    refreshPhotoStrip();
+                }
+            });
+
+            strip.addView(item, margin(dp(90), dp(115), 3, 0, 3, 0));
+        }
+    }
+
+    private void saveListing() {
+        String title = value(titleInput);
+        String seller = value(sellerInput);
+        String phone = value(phoneInput);
+        String variety = value(varietyInput);
+        String quantity = value(quantityInput);
+        String price = value(priceInput);
+        String description = value(descriptionInput);
+
+        if (title.isEmpty() || seller.isEmpty() || phone.isEmpty()
+                || variety.isEmpty() || quantity.isEmpty() || price.isEmpty()) {
+            Toast.makeText(this,
+                    tr("يرجى ملء الحقول الأساسية", "Veuillez remplir les champs obligatoires", "Please complete the required fields"),
+                    Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        Listing item = new Listing();
+        item.title = title;
+        item.seller = seller;
+        item.phone = phone;
+        item.variety = variety;
+        item.quantity = quantity;
+        item.price = price;
+        item.description = description;
+
+        for (Uri uri : selectedPhotos) {
+            item.photos.add(uri.toString());
+        }
+
+        listings.add(item);
+        persistListings();
+
+        hideKeyboard();
+
+        Toast.makeText(this,
+                tr("تم حفظ الإعلان على هذا الهاتف", "Annonce enregistrée sur ce téléphone", "Listing saved on this phone"),
+                Toast.LENGTH_LONG).show();
+
+        openPage("orders");
+    }
+
+    private String value(EditText input) {
+        return input == null || input.getText() == null ? "" : input.getText().toString().trim();
+    }
+
+    private void hideKeyboard() {
+        try {
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (imm != null && getCurrentFocus() != null) {
+                imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+            }
+        } catch (Exception ignored) {
+        }
+    }
 
     private void showOrders() {
+        buildShell(tr("إعلاناتي", "Mes annonces", "My Listings"));
+        addHeading(tr("إعلاناتي المحفوظة", "Mes annonces enregistrées", "My Saved Listings"));
 
-        currentPage = "orders";
+        if (listings.isEmpty()) {
+            addParagraph(tr(
+                    "لم تضف أي إعلان بعد. اضغط على «بيع» لإضافة إعلان جديد.",
+                    "Aucune annonce pour le moment. Appuyez sur « Vendre » pour en ajouter une.",
+                    "You haven't posted a listing yet. Tap Sell to add one."));
+        } else {
+            for (int i = listings.size() - 1; i >= 0; i--) {
+                addListingCard(listings.get(i));
 
-        LinearLayout root = baseLayout();
+                final int index = i;
+                Button delete = button(
+                        tr("حذف الإعلان", "Supprimer l'annonce", "Delete listing"),
+                        Color.RED, WHITE);
+                content.addView(delete, margin(-1, dp(45), 0, 0, 0, 12));
+                delete.setOnClickListener(v -> {
+                    listings.remove(index);
+                    persistListings();
+                    showOrders();
+                });
+            }
+        }
 
-        addHeader(root, "طلباتي");
-
-        root.addView(
-                makeText(
-                        "لا توجد طلبات حالياً",
-                        20,
-                        BROWN
-                )
-        );
-
-        Button back = makeButton("← العودة");
-        back.setOnClickListener(v -> showHome());
-        addButton(root, back);
+        Button add = button(tr("إضافة إعلان جديد", "Ajouter une annonce", "Add a new listing"), GOLD, DARK_GREEN);
+        content.addView(add, margin(-1, dp(50), 0, 8, 0, 10));
+        add.setOnClickListener(v -> openPage("sell"));
     }
 
-    // =========================================================
-    // صفحة الاتصال
-    // =========================================================
+    private void showMore() {
+        buildShell(tr("المزيد", "Menu", "More"));
+        addHeading(tr("القائمة", "Menu principal", "Menu"));
 
-    private void showContact() {
+        Button settings = button(tr("اللغة والإعدادات", "Langue et paramètres", "Language and Settings"), GREEN, WHITE);
+        content.addView(settings, margin(-1, dp(55), 0, 6, 0, 8));
+        settings.setOnClickListener(v -> openPage("settings"));
 
-        currentPage = "contact";
+        Button contact = button(tr("اتصل بنا", "Contactez-nous", "Contact us"), GOLD, DARK_GREEN);
+        content.addView(contact, margin(-1, dp(55), 0, 6, 0, 8));
+        contact.setOnClickListener(v -> openPage("contact"));
 
-        LinearLayout root = baseLayout();
-
-        addHeader(root, "اتصل بنا");
-
-        root.addView(
-                makeText("DATRIDHA", 30, GOLD)
-        );
-
-        root.addView(
-                makeText(
-                        "دقلة النور من بشني",
-                        21,
-                        GREEN
-                )
-        );
-
-        root.addView(
-                makeText(
-                        "للاستفسار والطلبات",
-                        17,
-                        BROWN
-                )
-        );
-
-        Button phone = makeButton("📞 +216 51022448");
-        phone.setOnClickListener(v -> callPhone());
-        addButton(root, phone);
-
-        Button email = makeButton(
-                "✉ ridhatouil1992@gmail.com"
-        );
-
-        email.setOnClickListener(v -> sendEmail());
-        addButton(root, email);
-
-        Button back = makeButton("← العودة");
-        back.setOnClickListener(v -> showHome());
-        addButton(root, back);
+        addParagraph(tr(
+                "DATRIDHA — سوق دقلة النور بالجملة",
+                "DATRIDHA — marché de Deglet Nour en gros",
+                "DATRIDHA — Deglet Nour Wholesale Market"));
     }
-
-    // =========================================================
-    // صفحة الإعدادات
-    // =========================================================
 
     private void showSettings() {
+        buildShell(tr("الإعدادات", "Paramètres", "Settings"));
+        addHeading(tr("اختيار اللغة", "Choisir la langue", "Choose Language"));
 
-        currentPage = "settings";
+        RadioGroup group = new RadioGroup(this);
+        group.setOrientation(RadioGroup.VERTICAL);
 
-        LinearLayout root = baseLayout();
+        RadioButton arabic = new RadioButton(this);
+        arabic.setText("العربية");
+        arabic.setTextSize(18);
+        arabic.setTextColor(TEXT);
+        group.addView(arabic);
 
-        addHeader(root, "الإعدادات");
+        RadioButton french = new RadioButton(this);
+        french.setText("Français");
+        french.setTextSize(18);
+        french.setTextColor(TEXT);
+        group.addView(french);
 
-        root.addView(
-                makeText("اللغة", 20, GREEN)
-        );
+        RadioButton english = new RadioButton(this);
+        english.setText("English");
+        english.setTextSize(18);
+        english.setTextColor(TEXT);
+        group.addView(english);
 
-        Button ar = makeButton("العربية");
-        Button fr = makeButton("Français");
-        Button en = makeButton("English");
+        if ("fr".equals(language)) french.setChecked(true);
+        else if ("en".equals(language)) english.setChecked(true);
+        else arabic.setChecked(true);
 
-        ar.setOnClickListener(v -> {
-            language = "ar";
-            showSettings();
+        content.addView(group, margin(-1, -2, 0, 5, 0, 10));
+
+        Button save = button(tr("حفظ اللغة", "Enregistrer la langue", "Save Language"), GOLD, DARK_GREEN);
+        content.addView(save, margin(-1, dp(52), 0, 8, 0, 10));
+
+        save.setOnClickListener(v -> {
+            if (french.isChecked()) language = "fr";
+            else if (english.isChecked()) language = "en";
+            else language = "ar";
+
+            preferences.edit().putString("language", language).apply();
+            Toast.makeText(this,
+                    tr("تم حفظ اللغة", "Langue enregistrée", "Language saved"),
+                    Toast.LENGTH_SHORT).show();
+            openPage("home");
         });
-
-        fr.setOnClickListener(v -> {
-            language = "fr";
-            showSettings();
-        });
-
-        en.setOnClickListener(v -> {
-            language = "en";
-            showSettings();
-        });
-
-        addButton(root, ar);
-        addButton(root, fr);
-        addButton(root, en);
-
-        Button back = makeButton("← العودة");
-        back.setOnClickListener(v -> showHome());
-        addButton(root, back);
     }
 
-    // =========================================================
-    // الاتصال الهاتفي
-    // =========================================================
+    private void showContact() {
+        buildShell(tr("اتصل بنا", "Contact", "Contact"));
+        addHeading(tr("تواصل معنا", "Contactez-nous", "Get in Touch"));
 
-    private void callPhone() {
+        addParagraph(tr(
+                "للاستفسار حول عروض التمور أو التطبيق، يمكنك الاتصال بنا.",
+                "Pour toute question sur les offres de dattes ou l'application, contactez-nous.",
+                "For questions about date offers or the app, contact us."));
 
-        try {
-            Intent intent = new Intent(
-                    Intent.ACTION_DIAL,
-                    Uri.parse("tel:+21651022448")
-            );
+        addSection(tr("الهاتف", "Téléphone", "Phone"));
+        TextView phone = text("+216 51 022 448", 18, GREEN, true);
+        content.addView(phone, margin(-1, dp(45), 0, 0, 0, 6));
 
+        Button call = button(tr("اتصال", "Appeler", "Call"), GREEN, WHITE);
+        content.addView(call, margin(-1, dp(50), 0, 0, 0, 10));
+        call.setOnClickListener(v -> {
+            Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:+21651022448"));
             startActivity(intent);
+        });
 
-        } catch (Exception e) {
+        addSection(tr("البريد الإلكتروني", "E-mail", "Email"));
+        TextView email = text("Ridhatouil1992@gmail.com", 16, GREEN, true);
+        content.addView(email, margin(-1, dp(45), 0, 0, 0, 6));
 
-            Toast.makeText(
-                    this,
-                    "تعذر فتح تطبيق الاتصال",
-                    Toast.LENGTH_SHORT
-            ).show();
+        Button mail = button(tr("إرسال بريد", "Envoyer un e-mail", "Send email"), GOLD, DARK_GREEN);
+        content.addView(mail, margin(-1, dp(50), 0, 0, 0, 10));
+        mail.setOnClickListener(v -> {
+            Intent intent = new Intent(Intent.ACTION_SENDTO);
+            intent.setData(Uri.parse("mailto:Ridhatouil1992@gmail.com"));
+            intent.putExtra(Intent.EXTRA_SUBJECT, "DATRIDHA");
+            try {
+                startActivity(intent);
+            } catch (Exception e) {
+                Toast.makeText(this, tr("لا يوجد تطبيق بريد", "Aucune application e-mail", "No email app found"), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void persistListings() {
+        try {
+            JSONArray arr = new JSONArray();
+            for (Listing item : listings) {
+                arr.put(item.toJson());
+            }
+            preferences.edit().putString("listings", arr.toString()).apply();
+        } catch (Exception ignored) {
         }
     }
 
-    // =========================================================
-    // البريد الإلكتروني
-    // =========================================================
-
-    private void sendEmail() {
+    private void loadListings() {
+        listings.clear();
+        String json = preferences.getString("listings", "[]");
 
         try {
-            Intent intent = new Intent(
-                    Intent.ACTION_SENDTO
-            );
-
-            intent.setData(
-                    Uri.parse("mailto:ridhatouil1992@gmail.com")
-            );
-
-            intent.putExtra(
-                    Intent.EXTRA_SUBJECT,
-                    "DATRIDHA"
-            );
-
-            startActivity(intent);
-
-        } catch (Exception e) {
-
-            Toast.makeText(
-                    this,
-                    "لا يوجد تطبيق بريد إلكتروني متاح",
-                    Toast.LENGTH_SHORT
-            ).show();
-        }
-    }
-
-    // =========================================================
-    // زر الرجوع في الهاتف
-    // =========================================================
-
-    @Override
-    public void onBackPressed() {
-
-        if (currentPage.equals("splash")) {
-
-            super.onBackPressed();
-
-        } else if (currentPage.equals("home")) {
-
-            showSplash();
-
-        } else if (currentPage.equals("buy")
-                || currentPage.equals("sell")
-                || currentPage.equals("orders")
-                || currentPage.equals("contact")
-                || currentPage.equals("settings")) {
-
-            showHome();
-
-        } else if (currentPage.equals("details")) {
-
-            showBuy();
-
-        } else {
-
-            showHome();
+            JSONArray arr = new JSONArray(json);
+            for (int i = 0; i < arr.length(); i++) {
+                listings.add(Listing.fromJson(arr.getJSONObject(i)));
+            }
+        } catch (Exception ignored) {
         }
     }
 }
