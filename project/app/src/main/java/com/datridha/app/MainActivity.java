@@ -325,7 +325,7 @@ public class MainActivity extends Activity {
     private void addPhoto(int resource, String description, int height) {
         ImageView image = new ImageView(this);
         image.setImageResource(resource);
-        imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        
         image.setContentDescription(description);
         content.addView(image, margin(-1, dp(height), 0, 6, 0, 6));
     }
