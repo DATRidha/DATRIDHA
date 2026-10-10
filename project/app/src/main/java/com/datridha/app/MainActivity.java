@@ -236,16 +236,53 @@ public class MainActivity extends Activity {
     }
 
     private void addNavButton(LinearLayout nav, String label, final String page) {
-        Button btn = new Button(this);
-        btn.setText(label);
-        btn.setTextSize(11);
-        btn.setAllCaps(false);
-        btn.setTextColor(WHITE);
-        btn.setPadding(dp(1), 0, dp(1), 0);
-        btn.setBackgroundColor(DARK_GREEN);
-        btn.setOnClickListener(v -> openPage(page));
-        nav.addView(btn, new LinearLayout.LayoutParams(0, dp(48), 1));
+    LinearLayout item = new LinearLayout(this);
+    item.setOrientation(LinearLayout.VERTICAL);
+    item.setGravity(Gravity.CENTER);
+    item.setPadding(dp(1), dp(3), dp(1), dp(3));
+    item.setBackgroundColor(DARK_GREEN);
+
+    TextView icon = new TextView(this);
+    icon.setGravity(Gravity.CENTER);
+    icon.setTextSize(21);
+    icon.setTextColor(GOLD);
+
+    switch (page) {
+        case "home":
+            icon.setText("⌂");
+            break;
+        case "buy":
+            icon.setText("🛒");
+            break;
+        case "sell":
+            icon.setText("🏷️");
+            break;
+        case "orders":
+            icon.setText("📦");
+            break;
+        case "more":
+            icon.setText("☰");
+            break;
+        default:
+            icon.setText("●");
+            break;
     }
+
+    item.addView(icon, new LinearLayout.LayoutParams(-1, dp(25)));
+
+    TextView textLabel = new TextView(this);
+    textLabel.setText(label);
+    textLabel.setTextSize(10);
+    textLabel.setTextColor(WHITE);
+    textLabel.setGravity(Gravity.CENTER);
+    textLabel.setSingleLine(true);
+
+    item.addView(textLabel, new LinearLayout.LayoutParams(-1, dp(18)));
+
+    item.setOnClickListener(v -> openPage(page));
+
+    nav.addView(item, new LinearLayout.LayoutParams(0, dp(48), 1));
+}
 
     private void showSplash() {
         root = vertical();
